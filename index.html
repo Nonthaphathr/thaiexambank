@@ -548,7 +548,7 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
       <div id="ppHint" style="position:absolute;left:0;right:0;bottom:10px;text-align:center;color:#fff;font-family:Prompt;text-shadow:0 1px 4px #000">กำลังค้นหาสี่เหลี่ยม 4 มุม...</div>
     </div>
     <div class="row" style="margin-top:10px"><button class="btn pri grow" id="ppShot">📸 ตรวจแผ่นนี้</button><button class="btn gho" id="ppStop">⏹ ปิดกล้อง</button></div>
-    <label class="chk sm" style="margin-top:6px">ความไวการตรวจรอยฝน <input type="range" id="ppSens" min="15" max="60" value="35" style="width:160px"></label>
+    <label class="chk sm" style="margin-top:6px">ความไวการตรวจรอยฝน <input type="range" id="ppSens" min="5" max="40" value="14" style="width:160px"></label>
   </div>
   <div id="ppRes" class="hide" style="margin-top:12px">
     <div class="grid g2">
@@ -1049,11 +1049,11 @@ function printHTML(title, body){
   const w=window.open('','_blank'); if(!w) return toast('เบราว์เซอร์บล็อกหน้าต่างใหม่ — อนุญาต pop-up ก่อน');
   w.document.write(`<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><title>${esc(title)}</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>addEventListener('load',()=>document.fonts.ready.then(()=>setTimeout(()=>print(),400)))<\/script>
   <style>@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Sarabun,sans-serif;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  html,body{margin:0;padding:0}.pg{position:relative;width:210mm;height:296.5mm;overflow:hidden;break-after:page;page-break-after:always}.pg:last-of-type{break-after:auto;page-break-after:auto}.a{position:absolute}
+  html,body{margin:0;padding:0}.pg{position:relative;width:210mm;height:296mm;overflow:hidden;break-after:page;page-break-after:always}.pg:last-of-type{break-after:auto;page-break-after:auto}.a{position:absolute}
   .f{position:absolute;width:12mm;height:12mm;background:#000}.bb{position:absolute;width:5mm;height:5mm;border:.35mm solid #222;border-radius:50%;transform:translate(-50%,-50%)}
-  .t{position:absolute;transform:translate(-50%,-50%);font-size:9pt}.book{padding:15mm 18mm;font-size:14pt;line-height:1.5}.book .q{break-inside:avoid;margin-bottom:3mm}</style></head><body>${body}
-  <script>document.fonts.ready.then(()=>setTimeout(()=>print(),300))<\/script></body></html>`); w.document.close();
+  .t{position:absolute;transform:translate(-50%,-50%);font-size:9pt}.book{padding:15mm 18mm;font-size:14pt;line-height:1.5}.book .q{break-inside:avoid;margin-bottom:3mm}</style></head><body>${body}</body></html>`); w.document.close();
 }
 function sheetPage(ex){
   const L=omrLayout(ex.qs.length); let h='<div class="pg">';
@@ -1169,14 +1169,17 @@ $('#ppShot').onclick=()=>{
 function readSheet(f,pts){
   const ex=PP.ex, map=homography(OMR.fid,pts), data=f.g.getImageData(0,0,f.W,f.H).data, gray=toGray(data,f.W,f.H);
   const [ax,ay]=map([100,150]),[bx,by]=map([110,150]); const pxmm=Math.hypot(bx-ax,by-ay)/10;
-  // threshold จากพื้นที่กระดาษ (ตัวอย่างรอบวงกลม)
+  // วัด "ความเข้ม" ภายในวงเทียบกับกระดาษรอบ ๆ วงนั้น (ทนแสงไม่สม่ำเสมอ/ดินสอสีอ่อน)
   const L=omrLayout(ex.qs.length), sens=+$('#ppSens').value/100;
-  const samp=[]; L.q.forEach(q=>q.b.forEach(([x,y])=>{ const [u,v]=map([x,y+4]); samp.push(gray[(Math.round(v)*f.W+Math.round(u))|0]||255); }));
-  const paper=samp.sort((a,b)=>a-b)[Math.floor(samp.length/2)]||220, T=paper*0.6;
-  const fill=(x,y)=>{ const [u,v]=map([x,y]), r=Math.max(2,1.6*pxmm); let n=0,d=0;
-    for(let yy=Math.floor(v-r);yy<=v+r;yy++) for(let xx=Math.floor(u-r);xx<=u+r;xx++){ if((xx-u)**2+(yy-v)**2>r*r||xx<0||yy<0||xx>=f.W||yy>=f.H) continue; n++; if(gray[yy*f.W+xx]<T) d++; } return n?d/n:0; };
+  const px=(u,v)=>{ u=Math.round(u); v=Math.round(v); return (u<0||v<0||u>=f.W||v>=f.H)?255:gray[v*f.W+u]; };
+  const meanDisc=(u,v,r)=>{ let n=0,sum=0; for(let yy=Math.floor(v-r);yy<=v+r;yy++) for(let xx=Math.floor(u-r);xx<=u+r;xx++){ if((xx-u)**2+(yy-v)**2>r*r) continue; n++; sum+=px(xx,yy); } return n?sum/n:255; };
+  const fill=(x,y)=>{ const [u,v]=map([x,y]); const m=meanDisc(u,v,Math.max(2,1.5*pxmm));
+    const ref=[[3.7,0],[-3.7,0],[0,3.7],[0,-3.7]].map(([dx,dy])=>{ const [a,b]=map([x+dx,y+dy]); return meanDisc(a,b,Math.max(1,0.6*pxmm)); }).sort((a,b)=>b-a);
+    const paper=(ref[0]+ref[1])/2||255; return Math.max(0,(paper-m)/paper); };
   const pick=arr=>{ const fr=arr.map(([x,y])=>fill(x,y)); const s=[...fr].map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]);
-    if(s[0][0]<sens) return {v:null,fr}; if(s[1]&&s[1][0]>=sens&&s[0][0]-s[1][0]<0.2) return {v:null,multi:true,fr}; return {v:s[0][1],fr}; };
+    if(s[0][0]<sens) return {v:null,fr};
+    if(s[1] && s[1][0]>=sens && s[0][0]-s[1][0]<0.08) return {v:null,multi:true,fr};
+    return {v:s[0][1],fr}; };
   const ans={}, flags=[];
   L.q.forEach(q=>{ const tf=ex.qs[q.i].t==='tf'; const r=pick(tf?q.b.slice(0,2):q.b); if(r.v!==null) ans[q.i]=r.v; if(r.multi) flags.push(q.i+1); });
   const d1=pick(L.num[0]), d2=pick(L.num[1]); const no=(d1.v??0)*10+(d2.v??0);
