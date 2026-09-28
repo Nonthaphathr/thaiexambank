@@ -13,6 +13,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@9/dist/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --or:#f97316; --or2:#fb923c; --or3:#fdba74; --orL:#fff1e6; --orD:#c2410c;
@@ -205,10 +206,17 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
         <button class="btn gho" id="bImport">⬆ นำเข้าข้อสอบ</button>
         <button class="btn gho" id="bPrompt">🤖 Master Prompt</button>
         <button class="btn gho" id="bExport">⬇ ส่งออก CSV</button>
+        <button class="btn gho" id="bXlsx">📊 ส่งออก .xlsx (ทั้งหมด)</button>
+        <button class="btn gho" id="bBackup">💾 สำรอง JSON</button>
+        <button class="btn gho" id="bRestore">♻️ นำเข้า JSON</button><input type="file" id="rFile" accept=".json,application/json" class="hide">
         <button class="btn gho" id="bTpl">📄 ไฟล์ตัวอย่าง</button>
       </div>
     </div>
     <div class="grid g4" style="margin-top:14px" id="bankStats"></div>
+  </div>
+  <div class="card">
+    <h3>📦 ชุดข้อสอบที่นำเข้า</h3>
+    <div class="tscroll"><table><thead><tr><th>ชุดข้อสอบ</th><th>ภาคเรียน</th><th>รหัสวิชา / ชื่อวิชา</th><th>จำนวน</th><th></th></tr></thead><tbody id="setBody"></tbody></table></div>
   </div>
   <div class="card">
     <h3>🗂 โครงสร้างคลัง (ภาคเรียน › รหัสวิชา)</h3>
@@ -404,6 +412,17 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
   <button class="btn pri lg" id="qSave">💾 บันทึก</button>
 </div></div>
 
+<!-- edit set -->
+<div class="ovl" id="mSet"><div class="sheet sm">
+  <div class="row between"><h2 style="margin:0">✏️ แก้ไขชุดข้อสอบ</h2><button class="btn gho xs" data-close>✕</button></div>
+  <p class="muted sm" id="esInfo"></p>
+  <div class="field"><label>ชื่อชุดข้อสอบ *</label><input id="esSet"></div>
+  <div class="field"><label>ภาคเรียน *</label><input id="esTerm" placeholder="1/2569"></div>
+  <div class="field"><label>รหัสวิชา *</label><input id="esCode" placeholder="ท31101"></div>
+  <div class="field"><label>ชื่อวิชา</label><input id="esSubj" placeholder="ภาษาไทย 1"></div>
+  <button class="btn pri lg" id="esSave">💾 บันทึกการแก้ไข</button>
+</div></div>
+
 <!-- import -->
 <div class="ovl" id="mImp"><div class="sheet">
   <div class="row between"><h2 style="margin:0">⬆ นำเข้าข้อสอบเข้าคลัง</h2><button class="btn gho xs" data-close>✕</button></div>
@@ -577,7 +596,7 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
 
 <!-- confirm -->
 <div class="ovl" id="mConf"><div class="sheet sm center">
-  <h3 id="cfMsg"></h3>
+  <h3 id="cfMsg" style="white-space:pre-line"></h3>
   <div class="row" style="margin-top:14px"><button class="btn gho grow" id="cfNo">ยกเลิก</button><button class="btn pri grow" id="cfYes">ยืนยัน</button></div>
 </div></div>
 
@@ -724,7 +743,7 @@ function renderBank(){
       cs.map(c=>`<div class="tnode" data-t="${esc(t)}" data-c="${esc(c)}"><b>${esc(c)}</b> ${esc(subjName(c))} · ${BANK.filter(b=>b.term===t&&b.code===c).length} ข้อ</div>`).join('')+`</div></div>`;
   }).join('') : '<span class="muted sm">ยังไม่มีข้อมูล</span>';
   $$('#bankTree .tnode').forEach(n=>n.onclick=()=>{ $('#fTerm').value=n.dataset.t; fillFilters(); $('#fCode').value=n.dataset.c; fillFilters(); drawBankTable(); });
-  fillSel($('#fTerm'),terms,'ทุกภาคเรียน'); fillFilters(); drawBankTable();
+  fillSel($('#fTerm'),terms,'ทุกภาคเรียน'); fillFilters(); drawBankTable(); renderSets();
 }
 function fillFilters(){
   const t=$('#fTerm').value; const inT=BANK.filter(b=>!t||b.term===t);
@@ -813,6 +832,69 @@ $('#bExport').onclick=()=>{ const L=filtered(); if(!L.length) return toast('ไ�
 $('#bTpl').onclick=()=>download('template-คลังข้อสอบ.csv',[CSV_HEAD.join(','),
   'mc,ข้อใดใช้คำราชาศัพท์ถูกต้อง,พระราชาเสวยพระกระยาหาร,พระราชาทรงเสวย,พระราชาทรงรับประทาน,พระราชากินข้าว,1,"เสวย เป็นกริยาราชาศัพท์อยู่แล้ว ไม่ต้องเติม ทรง",คำราชาศัพท์,เข้าใจ',
   'tf,"คำว่า ""ขนม"" ต้องประวิสรรชนีย์",ถูก,ผิด,,,2,ขนม ออกเสียง อะ กึ่งเสียง จึงไม่ประวิสรรชนีย์,การประวิสรรชนีย์,จำ'].join('\n'),'text/csv');
+
+/* ===== imported sets: edit / delete ===== */
+const bSetKey = b => b.term+'|'+b.code+'|'+(b.set||'');
+let SET_EDIT=null;
+function setGroups(){ const g={}; BANK.forEach(b=>{ const k=bSetKey(b); (g[k]=g[k]||{k,term:b.term,code:b.code,subj:b.subj||'',set:b.set||'',n:0}).n++; if(!g[k].subj&&b.subj) g[k].subj=b.subj; });
+  return Object.values(g).sort((a,b)=>termSort(a.term,b.term)||a.code.localeCompare(b.code)||a.set.localeCompare(b.set,'th')); }
+function renderSets(){
+  const G=setGroups();
+  $('#setBody').innerHTML=G.length?G.map((g,i)=>`<tr><td><b>${esc(g.set||'ข้อสอบที่เพิ่มเอง/ไม่ระบุชุด')}</b></td><td>${esc(g.term)}</td><td>${esc(g.code)} <span class="muted">${esc(g.subj)}</span></td><td>${g.n} ข้อ</td>
+    <td style="white-space:nowrap"><button class="btn gho xs" data-sed="${i}">✏️ แก้ไข</button> <button class="btn dan xs" data-sdel="${i}">🗑 ลบชุด</button></td></tr>`).join('')
+    :'<tr><td colspan="5" class="muted center">ยังไม่มีชุดข้อสอบ</td></tr>';
+  $$('#setBody [data-sed]').forEach(b=>b.onclick=()=>{ const g=G[+b.dataset.sed]; SET_EDIT=g;
+    $('#esInfo').textContent=`ชุดนี้มี ${g.n} ข้อ — การแก้ไขจะมีผลกับทุกข้อในชุด`;
+    $('#esSet').value=g.set; $('#esTerm').value=g.term; $('#esCode').value=g.code; $('#esSubj').value=g.subj; openM('mSet'); });
+  $$('#setBody [data-sdel]').forEach(b=>b.onclick=async()=>{ const g=G[+b.dataset.sdel];
+    if(!await confirmBox(`ลบชุด "${g.set||'ไม่ระบุชุด'}" (${g.code} ภาค ${g.term}) ทั้งหมด ${g.n} ข้อ?\nลบแล้วกู้คืนไม่ได้ (แนะนำให้สำรอง JSON ก่อน)`)) return;
+    const ids=BANK.filter(x=>bSetKey(x)===g.k).map(x=>x.id);
+    try{ for(let i=0;i<ids.length;i+=400){ const bt=writeBatch(db); ids.slice(i,i+400).forEach(id=>bt.delete(doc(db,'bank',id))); await bt.commit(); }
+      const del=new Set(ids); BANK=BANK.filter(x=>!del.has(x.id)); ids.forEach(id=>SEL.delete(id)); renderBank(); toast(`ลบชุดแล้ว (${ids.length} ข้อ)`);
+    }catch(e){ console.error(e); toast('ลบไม่สำเร็จ: '+e.code); } });
+}
+$('#esSave').onclick=async()=>{ const g=SET_EDIT; if(!g) return;
+  const d={ set:$('#esSet').value.trim(), term:$('#esTerm').value.trim(), code:$('#esCode').value.trim().replace(/\s/g,''), subj:$('#esSubj').value.trim() };
+  if(!d.set||!d.term||!d.code) return toast('กรอกชื่อชุด ภาคเรียน และรหัสวิชา');
+  const L=BANK.filter(x=>bSetKey(x)===g.k); const btn=$('#esSave'); btn.disabled=true; btn.textContent='กำลังบันทึก...';
+  try{ for(let i=0;i<L.length;i+=400){ const bt=writeBatch(db); L.slice(i,i+400).forEach(x=>bt.update(doc(db,'bank',x.id),d)); await bt.commit(); }
+    L.forEach(x=>Object.assign(x,d)); closeM('mSet'); renderBank(); toast(`แก้ไขชุดแล้ว (${L.length} ข้อ) ✅`);
+  }catch(e){ console.error(e); toast('บันทึกไม่สำเร็จ: '+e.code); }
+  btn.disabled=false; btn.textContent='💾 บันทึกการแก้ไข'; };
+
+/* ===== export all as .xlsx ===== */
+$('#bXlsx').onclick=()=>{ if(!window.XLSX) return toast('โหลดไลบรารี Excel ไม่สำเร็จ'); if(!BANK.length) return toast('ไม่มีข้อมูล');
+  const head=['ภาคเรียน','รหัสวิชา','ชื่อวิชา','ชุดข้อสอบ',...CSV_HEAD];
+  const rows=BANK.map(b=>[b.term,b.code,b.subj||'',b.set||'',b.type,b.q,b.opts[0]||'',b.opts[1]||'',b.opts[2]||'',b.opts[3]||'',b.ans+1,b.exp||'',b.topic||'',b.lv||'']);
+  const wb=XLSX.utils.book_new(); const ws=XLSX.utils.aoa_to_sheet([head,...rows]);
+  ws['!cols']=[10,10,18,22,6,50,22,22,22,22,6,40,16,10].map(w=>({wch:w})); ws['!autofilter']={ref:ws['!ref']};
+  XLSX.utils.book_append_sheet(wb,ws,'ข้อสอบทั้งหมด');
+  const sum=setGroups().map(g=>[g.term,g.code,g.subj,g.set,g.n]); const ws2=XLSX.utils.aoa_to_sheet([['ภาคเรียน','รหัสวิชา','ชื่อวิชา','ชุดข้อสอบ','จำนวนข้อ'],...sum]);
+  ws2['!cols']=[10,10,18,26,10].map(w=>({wch:w})); XLSX.utils.book_append_sheet(wb,ws2,'สรุปชุดข้อสอบ');
+  XLSX.writeFile(wb,`คลังข้อสอบทั้งหมด-${new Date().toISOString().slice(0,10)}.xlsx`); };
+
+/* ===== JSON backup / restore ===== */
+$('#bBackup').onclick=()=>{ if(!BANK.length) return toast('ไม่มีข้อมูล');
+  const data={app:'thai-exam-bank',kind:'bank',version:1,exportedAt:new Date().toISOString(),count:BANK.length,items:BANK};
+  const b=new Blob([JSON.stringify(data,null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+  a.download=`สำรองคลังข้อสอบ-${new Date().toISOString().slice(0,10)}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast(`สำรอง ${BANK.length} ข้อแล้ว ✅`); };
+$('#bRestore').onclick=()=>$('#rFile').click();
+$('#rFile').onchange=async e=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  let arr; try{ const j=JSON.parse((await f.text()).replace(/^﻿/,'')); arr=Array.isArray(j)?j:j.items; if(!Array.isArray(arr)) throw 0; }catch(_){ return toast('ไฟล์ JSON ไม่ถูกต้อง'); }
+  arr=arr.filter(x=>x&&x.q&&Array.isArray(x.opts)&&x.term&&x.code);
+  if(!arr.length) return toast('ไม่พบข้อสอบในไฟล์');
+  const have=new Set(BANK.map(b=>b.id)); const dup=arr.filter(x=>x.id&&have.has(x.id)).length;
+  if(!await confirmBox(`นำเข้าข้อสอบจากไฟล์สำรอง ${arr.length} ข้อ?${dup?`\n(มี ${dup} ข้อซ้ำกับในคลัง — จะเขียนทับด้วยข้อมูลจากไฟล์)`:''}`)) return;
+  toast('กำลังนำเข้า...');
+  try{ const now=Date.now(); const out=[];
+    for(let i=0;i<arr.length;i+=400){ const bt=writeBatch(db);
+      arr.slice(i,i+400).forEach((x,k)=>{ const {id,...d}=x; d.ts=d.ts||now+i+k; d.ans=+d.ans||0; d.set=d.set||''; d.subj=d.subj||''; d.topic=d.topic||'ทั่วไป';
+        const r=id?doc(db,'bank',String(id)):doc(collection(db,'bank')); bt.set(r,d); out.push({id:r.id,...d}); });
+      await bt.commit(); }
+    const m=new Map(BANK.map(b=>[b.id,b])); out.forEach(x=>m.set(x.id,x)); BANK=[...m.values()];
+    BANK.sort((a,b)=>(a.term+a.code+a.topic).localeCompare(b.term+b.code+b.topic,'th') || (a.ts||0)-(b.ts||0));
+    renderBank(); toast(`นำเข้าจากไฟล์สำรอง ${out.length} ข้อแล้ว ✅`);
+  }catch(err){ console.error(err); toast('นำเข้าไม่สำเร็จ: '+err.code); } };
 
 /* master prompt */
 $('#bPrompt').onclick=()=>{ if(!$('#pSubj').value&&$('#fCode').value) $('#pSubj').value=$('#fCode').value+' '+subjName($('#fCode').value); openM('mPr'); };
