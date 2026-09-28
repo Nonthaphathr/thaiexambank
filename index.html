@@ -128,6 +128,25 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
 @keyframes ring{from{transform:scale(1);opacity:.8}to{transform:scale(1.6);opacity:0}}
 .clist{background:var(--orL);border-radius:14px;padding:12px 16px;text-align:left;font-size:.93rem}
 .clist div{padding:3px 0}
+/* danger consent */
+#mConsent .sheet{border:2px solid #ef4444;animation:dangerGlow 1.6s ease-in-out infinite}
+@keyframes dangerGlow{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.55),0 20px 50px rgba(220,38,38,.25)}50%{box-shadow:0 0 0 10px rgba(239,68,68,0),0 20px 60px rgba(220,38,38,.45)}}
+#mConsent.ovl{background:radial-gradient(circle at center,rgba(127,29,29,.35),rgba(15,5,5,.7))}
+#mConsent .dstrip{height:8px;margin:-4px -4px 12px;border-radius:8px;background:repeating-linear-gradient(45deg,#dc2626 0 14px,#fde047 14px 28px);animation:stripMove 1s linear infinite;background-size:40px 40px}
+@keyframes stripMove{to{background-position:40px 0}}
+#mConsent .scan{background:radial-gradient(circle,#fff 30%,#fee2e2 31%)}
+#mConsent .scan::before,#mConsent .scan::after{border-color:#ef4444}
+#mConsent .bell{display:inline-block;transform-origin:50% 8%;animation:bellRing 1.2s ease-in-out infinite}
+@keyframes bellRing{0%,55%,100%{transform:rotate(0)}5%{transform:rotate(22deg)}10%{transform:rotate(-20deg)}15%{transform:rotate(16deg)}20%{transform:rotate(-12deg)}25%{transform:rotate(8deg)}30%{transform:rotate(-5deg)}35%{transform:rotate(2deg)}}
+#mConsent h2{color:#dc2626}
+#mConsent .clist{background:#fef2f2;border:1px solid #fecaca}
+#mConsent .clist b{color:#b91c1c}
+/* monitor status */
+#monStat{position:fixed;right:12px;bottom:12px;z-index:60;display:flex;flex-direction:column;gap:6px;max-width:min(360px,calc(100vw - 24px));pointer-events:none}
+#monStat .ms{background:rgba(255,255,255,.95);border-left:4px solid #dc2626;border-radius:10px;padding:6px 10px;font-size:.78rem;color:#7f1d1d;box-shadow:0 6px 18px rgba(0,0,0,.15);animation:msIn .35s ease,msOut .4s ease 7.6s forwards}
+#monStat .ms i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#dc2626;margin-right:6px;animation:blink 1s infinite}
+@keyframes msIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes msOut{to{opacity:0;transform:translateX(30px)}}
 /* analysis */
 #anaBox{background:linear-gradient(160deg,#ffffff,#fff6ee);border-radius:22px;padding:22px;border:1px solid var(--line)}
 .ahead{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-bottom:2px dashed var(--line);padding-bottom:14px;margin-bottom:14px}
@@ -338,6 +357,7 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
 </section>
 
 <!-- ================= STUDENT ================= -->
+<div id="monStat"></div>
 <section id="vStu" class="hide">
   <div id="sIntro" class="card login" style="max-width:520px">
     <img src="https://nonthaphathr.github.io/uploadimg/logoexamsystem.png" alt="">
@@ -490,7 +510,8 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
 
 <!-- consent (pre-exam) -->
 <div class="ovl" id="mConsent"><div class="sheet sm center">
-  <div class="scan">🛡️</div>
+  <div class="dstrip"></div>
+  <div class="scan"><span class="bell">🔔</span></div>
   <h2>ระบบเฝ้าระวังการทุจริตกำลังทำงาน</h2>
   <p class="muted" style="margin-top:-4px">โปรดอ่านก่อนเริ่มทำข้อสอบ</p>
   <div class="clist">
@@ -1569,8 +1590,15 @@ function beginExam(){
   if(STARTED) return; STARTED=true;
   if(EX.sync){ TK.startMs=EX.liveStart; saveProg({startMs:EX.liveStart}); }
   $('#sWait').classList.add('hide'); $('#sExam').classList.remove('hide'); $('#sxTitle').textContent=EX.title;
-  renderQ(); startTimer(); armCheat();
+  renderQ(); startTimer(); armCheat(); startMon();
 }
+let MON=null;
+function startMon(){ clearInterval(MON);
+  const show=()=>{ if(submitting||$('#sExam').classList.contains('hide')){ clearInterval(MON); return; }
+    const t=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' น.';
+    $('#monStat').innerHTML=[`ระบบส่งข้อมูลบันทึกเสียงไปที่ครูผู้สอนแล้วเมื่อ ${t}`,`ระบบส่งข้อมูลการใช้อุปกรณ์ข้างเคียงไปที่ครูผู้สอนแล้วเมื่อ ${t}`]
+      .map(x=>`<div class="ms"><i></i>${x}</div>`).join(''); };
+  MON=setInterval(show,180000); }
 /* สอบพร้อมกัน: รอครูปล่อย / ครูสั่งจบ */
 function watchLive(){
   if(!EX.liveStart){ $('#sWait').classList.remove('hide'); $('#swName').textContent=TK.info.name+' · '+EX.title; }
@@ -1629,7 +1657,7 @@ $('#sxSubmit').onclick=async()=>{ const left=EX.qs.length-Object.keys(TK.ans).le
   if(!await confirmBox(left?`ยังไม่ได้ตอบ ${left} ข้อ ยืนยันส่งคำตอบ?`:'ยืนยันส่งคำตอบ?')) return; submit(false); };
 let submitting=false;
 async function submit(auto, reason){
-  if(submitting) return; submitting=true; cheatOn=false; clearInterval(TIMER); closeM('mWarn');
+  if(submitting) return; submitting=true; cheatOn=false; clearInterval(TIMER); clearInterval(MON); $('#monStat').innerHTML=''; closeM('mWarn');
   const endMs=Date.now();
   try{ await updateDoc(doc(db,'exams',EX.id,'subs',UID),{ans:TK.ans,sw:TK.sw,status:'done',auto:!!auto,reason:reason||'',endMs,endAt:serverTimestamp()}); }
   catch(e){ console.error(e); submitting=false; cheatOn=true; return toast('ส่งไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่'); }
