@@ -1,0 +1,73 @@
+rules_version = '2';
+// =====================================================================
+//  ระบบคลังข้อสอบวิชาภาษาไทย — Firestore Security Rules
+//  พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง
+//  ต้องเปิด Authentication → Anonymous
+//  รหัสครู: ตั้งครั้งแรกจากหน้าเว็บ (secure/admin สร้างได้ครั้งเดียว)
+// =====================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // รหัสผ่านครู — อ่านไม่ได้จากหน้าเว็บ, สร้างได้ครั้งแรกครั้งเดียว
+    match /secure/{d} {
+      allow read, delete: if false;
+      allow create: if signedIn() && d == 'admin'
+        && request.resource.data.key is string && request.resource.data.key.size() >= 6;
+      allow update: if isAdmin() && d == 'admin'
+        && request.resource.data.key is string && request.resource.data.key.size() >= 6;
+    }
+    // สถานะว่าตั้งรหัสแล้วหรือยัง (สาธารณะ)
+    match /meta/{d} {
+      allow read: if signedIn();
+      allow create: if signedIn() && d == 'setup'
+        && exists(/databases/$(database)/documents/secure/admin);
+      allow update, delete: if isAdmin();
+    }
+
+    // เครื่องที่ยืนยันเป็นครูแล้ว
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list: if isAdmin();
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.key == get(/databases/$(database)/documents/secure/admin).data.key;
+      allow delete: if signedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // คลังข้อสอบ (มีเฉลย) — ครูเท่านั้น
+    match /bank/{qid} {
+      allow read, write: if isAdmin();
+    }
+
+    // ชุดข้อสอบที่มอบหมาย (ไม่มีเฉลย)
+    match /exams/{eid} {
+      allow get: if signedIn();
+      allow list, write: if isAdmin();
+
+      // เฉลย: ครู หรือ นักเรียนที่ส่งแล้วและครูเปิดให้ดูคะแนน
+      match /private/{k} {
+        allow read: if isAdmin() || (signedIn()
+          && get(/databases/$(database)/documents/exams/$(eid)).data.showScore == true
+          && get(/databases/$(database)/documents/exams/$(eid)/subs/$(request.auth.uid)).data.status == 'done');
+        allow write: if isAdmin();
+      }
+
+      // คำตอบนักเรียน 1 คน / เครื่อง
+      match /subs/{uid} {
+        allow get: if isAdmin() || (signedIn() && request.auth.uid == uid);
+        allow list, delete: if isAdmin();
+        allow create: if signedIn() && request.auth.uid == uid
+          && request.resource.data.status == 'doing'
+          && get(/databases/$(database)/documents/exams/$(eid)).data.open == true;
+        allow update: if signedIn() && request.auth.uid == uid
+          && resource.data.status == 'doing'
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.name == resource.data.name;
+      }
+    }
+  }
+}

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบคลังข้อสอบวิชาภาษาไทย</title>
+<link rel="icon" type="image/png" href="https://nonthaphathr.github.io/uploadimg/logoexamsystem.png">
+<link rel="apple-touch-icon" href="https://nonthaphathr.github.io/uploadimg/logoexamsystem.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --or:#f97316; --or2:#fb923c; --or3:#fdba74; --orL:#fff1e6; --orD:#c2410c;
+  --ink:#1f2937; --mut:#6b7280; --line:rgba(249,115,22,.16);
+  --glass:rgba(255,255,255,.72); --glassB:rgba(255,255,255,.9);
+  --ok:#16a34a; --okL:#dcfce7; --no:#dc2626; --noL:#fee2e2; --warn:#d97706; --warnL:#fef3c7;
+  --sh:0 10px 30px rgba(249,115,22,.10), 0 2px 6px rgba(31,41,55,.05);
+  --r:20px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Sarabun',system-ui,sans-serif;color:var(--ink);font-size:16px;line-height:1.55;
+  background:#fffaf5;min-height:100vh;position:relative;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;z-index:-1;border-radius:50%;filter:blur(70px);opacity:.55}
+body::before{width:520px;height:520px;background:#fed7aa;top:-160px;right:-120px}
+body::after{width:460px;height:460px;background:#ffedd5;bottom:-160px;left:-120px}
+h1,h2,h3,h4{font-family:'Prompt',sans-serif;font-weight:600;margin:0 0 .5em;line-height:1.3}
+button,input,select,textarea{font:inherit;color:inherit}
+.hide{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+/* header */
+.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.topin{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:220px}
+.brand img{width:46px;height:46px;border-radius:14px;object-fit:contain;background:#fff;box-shadow:var(--sh)}
+.brand b{font-family:'Prompt';font-size:1.12rem;display:block;color:var(--orD)}
+.brand small{color:var(--mut);font-size:.82rem}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav button{border:0;background:transparent;padding:8px 14px;border-radius:999px;cursor:pointer;font-family:'Prompt';font-size:.92rem;color:var(--mut);transition:.2s}
+.nav button:hover{background:var(--orL);color:var(--orD)}
+.nav button.on{background:linear-gradient(135deg,var(--or),var(--or2));color:#fff;box-shadow:0 6px 16px rgba(249,115,22,.3)}
+/* glass card */
+.card{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glassB);border-radius:var(--r);box-shadow:var(--sh);padding:18px;margin-bottom:16px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.grow{flex:1;min-width:150px}
+.muted{color:var(--mut)} .center{text-align:center} .sm{font-size:.86rem}
+/* buttons */
+.btn{border:0;border-radius:12px;padding:9px 16px;cursor:pointer;font-family:'Prompt';font-size:.92rem;transition:.18s;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.pri{background:linear-gradient(135deg,var(--or),var(--or2));color:#fff;box-shadow:0 6px 16px rgba(249,115,22,.28)}
+.gho{background:#fff;border:1px solid var(--line);color:var(--orD)}
+.gho:hover{background:var(--orL)}
+.dan{background:var(--noL);color:var(--no)}
+.okb{background:var(--okL);color:var(--ok)}
+.lg{padding:13px 20px;font-size:1rem;border-radius:14px;width:100%}
+.xs{padding:5px 10px;font-size:.8rem;border-radius:9px}
+/* form */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.field label{font-size:.85rem;color:var(--mut);font-weight:500}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.9);outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--or2);box-shadow:0 0 0 3px rgba(251,146,60,.18)}
+textarea{min-height:90px;resize:vertical}
+input[type=checkbox]{width:auto;accent-color:var(--or)}
+.chk{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.93rem}
+/* chips / badge */
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--orL);color:var(--orD)}
+.badge.ok{background:var(--okL);color:var(--ok)} .badge.no{background:var(--noL);color:var(--no)} .badge.wa{background:var(--warnL);color:var(--warn)} .badge.gr{background:#f3f4f6;color:#4b5563}
+/* stat */
+.stat{background:linear-gradient(145deg,#fff,#fff7ef);border:1px solid var(--line);border-radius:16px;padding:14px}
+.stat .v{font-family:'Prompt';font-size:1.7rem;font-weight:700;color:var(--orD);line-height:1.1}
+.stat .l{font-size:.82rem;color:var(--mut)}
+/* table / list */
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{font-family:'Prompt';font-weight:500;color:var(--mut);font-size:.82rem;background:rgba(255,241,230,.6)}
+.tbl tr:hover td{background:rgba(255,241,230,.35)}
+.tscroll{overflow-x:auto;max-height:62vh;overflow-y:auto;border-radius:12px}
+.qtxt{font-weight:500} .opts{font-size:.84rem;color:var(--mut)}
+.opts .c{color:var(--ok);font-weight:600}
+/* modal */
+.ovl{position:fixed;inset:0;background:rgba(31,41,55,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:100;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 14px}
+.ovl.on{display:flex}
+.sheet{width:100%;max-width:720px;background:rgba(255,255,255,.96);border-radius:24px;box-shadow:0 30px 70px rgba(0,0,0,.2);padding:22px;animation:pop .25s ease}
+.sheet.sm{max-width:480px}
+@keyframes pop{from{transform:translateY(14px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f2937;color:#fff;padding:11px 18px;border-radius:14px;z-index:300;font-size:.92rem;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.25s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1;bottom:34px}
+/* login */
+.login{max-width:420px;margin:8vh auto;text-align:center}
+.login img{width:110px;height:110px;border-radius:28px;background:#fff;box-shadow:var(--sh);object-fit:contain;margin-bottom:10px}
+/* tree summary */
+.tree{display:flex;flex-wrap:wrap;gap:8px}
+.tnode{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 12px;cursor:pointer;font-size:.88rem;transition:.15s}
+.tnode:hover,.tnode.on{border-color:var(--or);background:var(--orL)}
+.tnode b{color:var(--orD)}
+/* exam (student) */
+.qcard{font-size:1.08rem}
+.qnum{font-family:'Prompt';color:var(--or);font-weight:600}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 14px;margin:8px 0;cursor:pointer;transition:.15s;font-size:1rem}
+.opt:hover{border-color:var(--or3)}
+.opt.sel{border-color:var(--or);background:var(--orL)}
+.opt .k{flex:0 0 30px;height:30px;border-radius:50%;background:var(--orL);color:var(--orD);display:flex;align-items:center;justify-content:center;font-family:'Prompt';font-weight:600}
+.opt.sel .k{background:var(--or);color:#fff}
+.qnav{display:flex;flex-wrap:wrap;gap:6px}
+.qnav button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-family:'Prompt';font-size:.85rem}
+.qnav button.ans{background:var(--orL);border-color:var(--or3);color:var(--orD)}
+.qnav button.cur{background:var(--or);color:#fff;border-color:var(--or)}
+.timer{font-family:'Prompt';font-weight:700;font-size:1.25rem;color:var(--orD);background:var(--orL);padding:6px 14px;border-radius:12px}
+.timer.low{background:var(--noL);color:var(--no);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.6}}
+.pbar{height:8px;background:var(--orL);border-radius:99px;overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--or),var(--or3));transition:.3s}
+/* consent */
+.scan{position:relative;width:96px;height:96px;margin:6px auto 12px;border-radius:50%;background:radial-gradient(circle,#fff 30%,var(--orL) 31%);display:flex;align-items:center;justify-content:center;font-size:2.4rem}
+.scan::before,.scan::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--or2);animation:ring 2s infinite}
+.scan::after{animation-delay:1s}
+@keyframes ring{from{transform:scale(1);opacity:.8}to{transform:scale(1.6);opacity:0}}
+.clist{background:var(--orL);border-radius:14px;padding:12px 16px;text-align:left;font-size:.93rem}
+.clist div{padding:3px 0}
+/* analysis */
+#anaBox{background:linear-gradient(160deg,#ffffff,#fff6ee);border-radius:22px;padding:22px;border:1px solid var(--line)}
+.ahead{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-bottom:2px dashed var(--line);padding-bottom:14px;margin-bottom:14px}
+.ahead img{width:56px;height:56px;border-radius:14px;background:#fff;object-fit:contain}
+.ring{width:130px;height:130px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ring>div{width:98px;height:98px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring b{font-family:'Prompt';font-size:1.6rem;color:var(--orD);line-height:1}
+.bar{margin:8px 0}
+.bar .t{display:flex;justify-content:space-between;font-size:.88rem}
+.bar .b{height:12px;background:#f3f4f6;border-radius:99px;overflow:hidden;margin-top:3px}
+.bar .b i{display:block;height:100%;border-radius:99px}
+.box{border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.box.s{background:var(--okL)} .box.w{background:var(--noL)} .box.r{background:#eef2ff}
+.box h4{margin:0 0 6px;font-size:.98rem}
+.box ul{margin:0;padding-left:20px;font-size:.92rem}
+.wrongq{font-size:.88rem;border-left:3px solid var(--no);padding:6px 10px;margin:6px 0;background:#fff;border-radius:0 10px 10px 0}
+.foot{text-align:center;color:var(--mut);font-size:.82rem;margin-top:30px}
+.drop{border:2px dashed var(--or3);border-radius:16px;padding:18px;text-align:center;background:rgba(255,241,230,.5);cursor:pointer}
+.ptxt{min-height:260px;font-family:ui-monospace,Consolas,monospace;font-size:.82rem}
+.ailinks{display:flex;gap:8px;flex-wrap:wrap}
+.ailinks a{padding:7px 12px;border-radius:10px;background:#fff;border:1px solid var(--line);text-decoration:none;color:var(--ink);font-size:.88rem}
+.examc{border-left:5px solid var(--or)}
+.hist{display:flex;align-items:flex-end;gap:6px;height:140px;padding-top:10px}
+.hist div{flex:1;background:linear-gradient(180deg,var(--or2),var(--or));border-radius:8px 8px 0 0;position:relative;min-height:2px}
+.hist div span{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:.75rem;color:var(--mut)}
+.hlab{display:flex;gap:6px}.hlab div{flex:1;text-align:center;font-size:.72rem;color:var(--mut)}
+@media(max-width:640px){.nav{width:100%;overflow-x:auto;flex-wrap:nowrap}.nav button{white-space:nowrap}.card{padding:14px}}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="top">
+  <div class="topin">
+    <div class="brand">
+      <img src="https://nonthaphathr.github.io/uploadimg/logoexamsystem.png" alt="logo">
+      <div><b>ระบบคลังข้อสอบวิชาภาษาไทย</b><small>พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง</small></div>
+    </div>
+    <nav class="nav hide" id="nav">
+      <button data-v="vBank" class="on">📚 คลังข้อสอบ</button>
+      <button data-v="vBuild">🎲 สร้างข้อสอบ</button>
+      <button data-v="vExams">📝 ข้อสอบที่มอบหมาย</button>
+      <button data-v="vAna">📊 วิเคราะห์ผู้เรียน</button>
+      <button data-v="vSet">⚙️ ตั้งค่า</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= LOADING ================= -->
+<section id="vLoad" class="center" style="padding:80px 0">
+  <div class="scan">📚</div><p class="muted">กำลังเชื่อมต่อระบบ...</p>
+</section>
+
+<!-- ================= LOGIN ================= -->
+<section id="vLogin" class="hide">
+  <div class="card login">
+    <img src="https://nonthaphathr.github.io/uploadimg/logoexamsystem.png" alt="">
+    <h2>เข้าสู่ระบบครู</h2>
+    <p class="muted sm" id="loginHint">กรอกรหัสผ่านครูเพื่อจัดการคลังข้อสอบ</p>
+    <div class="field"><input type="password" id="lgPass" placeholder="รหัสผ่านครู (อย่างน้อย 6 ตัวอักษร)"></div>
+    <div class="field hide" id="lgPass2Wrap"><input type="password" id="lgPass2" placeholder="ยืนยันรหัสผ่านอีกครั้ง"></div>
+    <button class="btn pri lg" id="lgBtn">เข้าสู่ระบบ</button>
+    <p class="muted sm" style="margin-top:14px">นักเรียนเข้าทำข้อสอบผ่านลิงก์ที่ครูส่งให้เท่านั้น</p>
+  </div>
+</section>
+
+<!-- ================= BANK ================= -->
+<section id="vBank" class="hide">
+  <div class="card">
+    <div class="row between">
+      <div><h2 style="margin:0">📚 คลังข้อสอบ</h2><p class="muted sm" style="margin:0">จัดเก็บแยกตามภาคเรียน และรหัสวิชา</p></div>
+      <div class="row">
+        <button class="btn pri" id="bAdd">＋ เพิ่มข้อสอบ</button>
+        <button class="btn gho" id="bImport">⬆ นำเข้าข้อสอบ</button>
+        <button class="btn gho" id="bPrompt">🤖 Master Prompt</button>
+        <button class="btn gho" id="bExport">⬇ ส่งออก CSV</button>
+        <button class="btn gho" id="bTpl">📄 ไฟล์ตัวอย่าง</button>
+      </div>
+    </div>
+    <div class="grid g4" style="margin-top:14px" id="bankStats"></div>
+  </div>
+  <div class="card">
+    <h3>🗂 โครงสร้างคลัง (ภาคเรียน › รหัสวิชา)</h3>
+    <div class="tree" id="bankTree"></div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div class="grow field" style="margin:0"><select id="fTerm"></select></div>
+      <div class="grow field" style="margin:0"><select id="fCode"></select></div>
+      <div class="grow field" style="margin:0"><select id="fTopic"></select></div>
+      <div class="grow field" style="margin:0;flex:2"><input id="fQ" placeholder="🔎 ค้นหาคำถาม..."></div>
+    </div>
+    <div class="row between" style="margin:12px 0 8px">
+      <span class="muted sm" id="fCount"></span>
+      <div class="row">
+        <button class="btn gho xs" id="bGuideBank">📋 คัดลอกแจ้งแนวข้อสอบ (ตามตัวกรอง)</button>
+        <button class="btn gho xs" id="bToBuild">🎲 สร้างข้อสอบจากที่เลือก</button>
+        <button class="btn dan xs" id="bDelSel">🗑 ลบที่เลือก</button>
+      </div>
+    </div>
+    <div class="tscroll">
+      <table class="tbl"><thead><tr>
+        <th style="width:30px"><input type="checkbox" id="selAll"></th><th>คำถาม / ตัวเลือก</th><th>หัวข้อ</th><th>วิชา</th><th style="width:96px"></th>
+      </tr></thead><tbody id="bankBody"></tbody></table>
+    </div>
+    <p class="muted center hide" id="bankEmpty" style="padding:30px">ยังไม่มีข้อสอบในคลัง — เริ่มจาก “นำเข้าข้อสอบ” หรือ “Master Prompt”</p>
+  </div>
+</section>
+
+<!-- ================= BUILD ================= -->
+<section id="vBuild" class="hide">
+  <div class="grid g2">
+    <div class="card">
+      <h2>🎲 สร้างข้อสอบจากคลัง</h2>
+      <div class="field"><label>ชื่อชุดข้อสอบ</label><input id="xTitle" placeholder="เช่น สอบกลางภาค ท31101 ภาษาไทย 1"></div>
+      <div class="field"><label>แหล่งข้อสอบ</label>
+        <select id="xSrc"><option value="rand">สุ่มจากคลังรวม (คละหลายภาค/หลายวิชาได้)</option><option value="sel">ใช้ข้อที่เลือกไว้ในคลัง</option></select></div>
+      <div id="xRandBox">
+        <div class="field"><label>ภาคเรียน (เลือกได้หลายรายการ)</label><div class="tree" id="xTerms"></div></div>
+        <div class="field"><label>รหัสวิชา (เลือกได้หลายรายการ)</label><div class="tree" id="xCodes"></div></div>
+        <div class="field"><label>จำนวนข้อต่อหัวข้อ (เว้นว่าง = ไม่ใช้หัวข้อนั้น)</label><div id="xTopics"></div></div>
+        <div class="row"><div class="grow field"><label>หรือ สุ่มรวมทั้งหมด (ข้อ)</label><input type="number" id="xTotal" min="0" placeholder="0 = ใช้ตามหัวข้อ"></div>
+        <div class="grow field"><label>ข้อในคลังที่เข้าเงื่อนไข</label><input id="xPool" readonly></div></div>
+      </div>
+      <p class="muted sm hide" id="xSelInfo"></p>
+    </div>
+    <div class="card">
+      <h3>⚙️ ตั้งค่าการสอบ</h3>
+      <div class="row">
+        <div class="grow field"><label>ภาคเรียนที่ใช้สอบ</label><input id="xTerm" placeholder="1/2569"></div>
+        <div class="grow field"><label>รหัสวิชา / ชื่อวิชา</label><input id="xSubj" placeholder="ท31101 ภาษาไทย 1"></div>
+      </div>
+      <div class="row">
+        <div class="grow field"><label>เวลาทำข้อสอบ (นาที, 0 = ไม่จำกัด)</label><input type="number" id="xTime" value="30" min="0"></div>
+        <div class="grow field"><label>สลับแท็บได้สูงสุด (ครั้ง) ก่อนส่งอัตโนมัติ</label><input type="number" id="xSw" value="3" min="0"></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="xShufQ" checked> สลับลำดับข้อ</label>
+      <label class="chk"><input type="checkbox" id="xShufO" checked> สลับลำดับตัวเลือก (เฉพาะ 4 ตัวเลือก)</label>
+      <label class="chk"><input type="checkbox" id="xShow" checked> แสดงคะแนน/ผลวิเคราะห์ให้นักเรียนหลังส่ง</label>
+      <label class="chk"><input type="checkbox" id="xConsent" checked> แสดงหน้าต่างขอความยินยอมก่อนเริ่มสอบ</label>
+      <div class="field" style="margin-top:10px"><label>คำชี้แจงถึงนักเรียน (ไม่บังคับ)</label><textarea id="xNote" placeholder="เช่น อ่านคำถามให้ละเอียด ทำด้วยตนเอง"></textarea></div>
+      <div class="row"><button class="btn gho grow" id="xPreview">👁 สุ่มตัวอย่าง</button><button class="btn pri grow" id="xCreate">🚀 สร้างและมอบหมาย</button></div>
+    </div>
+  </div>
+  <div class="card hide" id="xPrevCard"><div class="row between"><h3 style="margin:0">ตัวอย่างข้อสอบที่สุ่มได้</h3><span class="badge" id="xPrevN"></span></div><div id="xPrevList" style="margin-top:10px"></div></div>
+</section>
+
+<!-- ================= EXAMS ================= -->
+<section id="vExams" class="hide">
+  <div class="card"><div class="row between"><h2 style="margin:0">📝 ข้อสอบที่มอบหมาย</h2><button class="btn gho" id="eReload">↻ โหลดใหม่</button></div></div>
+  <div id="examList"></div>
+  <p class="muted center hide" id="examEmpty">ยังไม่มีข้อสอบที่มอบหมาย — ไปที่แท็บ “สร้างข้อสอบ”</p>
+</section>
+
+<!-- ================= ANALYSIS ================= -->
+<section id="vAna" class="hide">
+  <div class="card">
+    <h2>📊 วิเคราะห์ผู้เรียน</h2>
+    <div class="row">
+      <div class="grow field" style="margin:0;flex:2"><select id="aExam"></select></div>
+      <button class="btn gho" id="aLoad">↻ โหลดผล</button>
+      <button class="btn gho" id="aCsv">⬇ ผลคะแนน CSV</button>
+    </div>
+  </div>
+  <div id="aClass" class="hide">
+    <div class="grid g4" id="aKpi"></div>
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card"><h3>การกระจายคะแนน (%)</h3><div class="hist" id="aHist"></div><div class="hlab" id="aHistL"></div></div>
+      <div class="card"><h3>ผลรายหัวข้อ (ทั้งห้อง)</h3><div id="aTopicCls"></div></div>
+    </div>
+    <div class="card"><h3>ข้อที่นักเรียนตอบผิดมากที่สุด</h3><div id="aHard"></div></div>
+    <div class="card">
+      <div class="row between"><h3 style="margin:0">รายชื่อผู้เข้าสอบ</h3><input id="aSearch" placeholder="ค้นหาชื่อ/ห้อง" style="max-width:240px"></div>
+      <div class="tscroll" style="margin-top:10px"><table class="tbl"><thead><tr><th>#</th><th>ชื่อ-สกุล</th><th>ชั้น/เลขที่</th><th>คะแนน</th><th>สลับแท็บ</th><th>สถานะ</th><th></th></tr></thead><tbody id="aBody"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SETTINGS ================= -->
+<section id="vSet" class="hide">
+  <div class="grid g2">
+    <div class="card">
+      <h3>🔑 เปลี่ยนรหัสผ่านครู</h3>
+      <div class="field"><input type="password" id="sNew" placeholder="รหัสใหม่ (อย่างน้อย 6 ตัว)"></div>
+      <button class="btn pri" id="sChange">บันทึกรหัสใหม่</button>
+      <p class="muted sm">เครื่องที่เข้าระบบไว้แล้วต้องเข้าระบบใหม่เมื่อเปลี่ยนรหัส</p>
+    </div>
+    <div class="card">
+      <h3>🚪 ออกจากระบบ</h3>
+      <p class="muted sm">ยกเลิกสิทธิ์ครูของเครื่องนี้</p>
+      <button class="btn dan" id="sLogout">ออกจากระบบ</button>
+      <h3 style="margin-top:18px">ℹ️ เกี่ยวกับระบบ</h3>
+      <p class="muted sm">ระบบคลังข้อสอบวิชาภาษาไทย<br>พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง<br>Firebase Firestore + Anonymous Auth</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STUDENT ================= -->
+<section id="vStu" class="hide">
+  <div id="sIntro" class="card login" style="max-width:520px">
+    <img src="https://nonthaphathr.github.io/uploadimg/logoexamsystem.png" alt="">
+    <h2 id="sTitle">แบบทดสอบ</h2>
+    <p class="muted" id="sMeta"></p>
+    <div class="clist hide" id="sNote" style="margin-bottom:12px"></div>
+    <div id="sForm">
+      <div class="field"><input id="stName" placeholder="ชื่อ-นามสกุล (เช่น ด.ช.สมชาย ใจดี)"></div>
+      <div class="row"><div class="grow field"><input id="stCls" placeholder="ชั้น เช่น ม.4/1"></div><div class="grow field"><input id="stNo" type="number" placeholder="เลขที่"></div></div>
+      <button class="btn pri lg" id="stGo">เริ่มทำข้อสอบ</button>
+    </div>
+    <p class="muted sm" id="sClosed"></p>
+  </div>
+
+  <div id="sExam" class="hide">
+    <div class="card" style="position:sticky;top:78px;z-index:10;padding:12px 16px">
+      <div class="row between"><b id="sxTitle" style="font-family:Prompt"></b><span class="timer" id="sxTimer">--:--</span></div>
+      <div class="pbar" style="margin-top:8px"><i id="sxBar" style="width:0"></i></div>
+    </div>
+    <div class="card qcard">
+      <div class="row between"><span class="qnum" id="sxNum"></span><span class="badge" id="sxTopic"></span></div>
+      <p id="sxQ" style="font-weight:600;font-size:1.12rem;margin:10px 0"></p>
+      <div id="sxOpts"></div>
+      <div class="row between" style="margin-top:12px">
+        <button class="btn gho" id="sxPrev">‹ ก่อนหน้า</button>
+        <button class="btn gho" id="sxNext">ถัดไป ›</button>
+      </div>
+    </div>
+    <div class="card"><div class="qnav" id="sxNav"></div>
+      <button class="btn pri lg" id="sxSubmit" style="margin-top:14px">📤 ส่งคำตอบ</button></div>
+  </div>
+
+  <div id="sDone" class="hide">
+    <div class="card center" id="sDoneMsg"></div>
+    <div id="sDoneAna"></div>
+  </div>
+</section>
+
+<footer class="foot">© ระบบคลังข้อสอบวิชาภาษาไทย · พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง</footer>
+</main>
+
+<!-- ================= MODALS ================= -->
+<!-- edit question -->
+<div class="ovl" id="mQ"><div class="sheet">
+  <div class="row between"><h2 style="margin:0" id="mqTitle">เพิ่มข้อสอบ</h2><button class="btn gho xs" data-close>✕</button></div>
+  <div class="row" style="margin-top:10px">
+    <div class="grow field"><label>ภาคเรียน</label><input id="qTerm" placeholder="1/2569"></div>
+    <div class="grow field"><label>รหัสวิชา</label><input id="qCode" placeholder="ท31101"></div>
+    <div class="grow field"><label>ชื่อวิชา</label><input id="qSubj" placeholder="ภาษาไทย 1"></div>
+  </div>
+  <div class="row">
+    <div class="grow field"><label>หัวข้อ / ตัวชี้วัด</label><input id="qTopic" placeholder="เช่น การอ่านจับใจความ"></div>
+    <div class="grow field"><label>ประเภท</label><select id="qType"><option value="mc">4 ตัวเลือก</option><option value="tf">ถูก/ผิด</option></select></div>
+    <div class="grow field"><label>ระดับ</label><select id="qLv"><option>จำ</option><option>เข้าใจ</option><option>ประยุกต์ใช้</option><option>วิเคราะห์</option><option>ประเมินค่า</option><option>สร้างสรรค์</option></select></div>
+  </div>
+  <div class="field"><label>คำถาม</label><textarea id="qQ"></textarea></div>
+  <div class="grid g2" id="qOptsBox">
+    <div class="field"><label>ตัวเลือก 1</label><input class="qo"></div>
+    <div class="field"><label>ตัวเลือก 2</label><input class="qo"></div>
+    <div class="field qo34"><label>ตัวเลือก 3</label><input class="qo"></div>
+    <div class="field qo34"><label>ตัวเลือก 4</label><input class="qo"></div>
+  </div>
+  <div class="row"><div class="grow field"><label>เฉลย</label><select id="qAns"><option value="0">ตัวเลือก 1</option><option value="1">ตัวเลือก 2</option><option value="2">ตัวเลือก 3</option><option value="3">ตัวเลือก 4</option></select></div></div>
+  <div class="field"><label>คำอธิบายเฉลย</label><textarea id="qExp" style="min-height:60px"></textarea></div>
+  <button class="btn pri lg" id="qSave">💾 บันทึก</button>
+</div></div>
+
+<!-- import -->
+<div class="ovl" id="mImp"><div class="sheet">
+  <div class="row between"><h2 style="margin:0">⬆ นำเข้าข้อสอบเข้าคลัง</h2><button class="btn gho xs" data-close>✕</button></div>
+  <p class="muted sm">รองรับไฟล์ CSV (UTF-8) หัวตาราง: <code>ประเภท,คำถาม,ตัวเลือก1,ตัวเลือก2,ตัวเลือก3,ตัวเลือก4,เฉลย,คำอธิบาย,หัวข้อ,ระดับ</code> — หรือวางข้อความ CSV ที่ได้จาก AI ลงช่องด้านล่าง</p>
+  <div class="row">
+    <div class="grow field"><label>ภาคเรียน *</label><input id="iTerm" placeholder="1/2569"></div>
+    <div class="grow field"><label>รหัสวิชา *</label><input id="iCode" placeholder="ท31101"></div>
+    <div class="grow field"><label>ชื่อวิชา</label><input id="iSubj" placeholder="ภาษาไทย 1"></div>
+  </div>
+  <div class="field"><label>หัวข้อเริ่มต้น (ใช้เมื่อในไฟล์ไม่มีคอลัมน์หัวข้อ)</label><input id="iTopic" placeholder="เช่น หลักภาษา"></div>
+  <div class="drop" id="iDrop">📂 คลิกเพื่อเลือกไฟล์ .csv หรือ ลากไฟล์มาวาง<input type="file" id="iFile" accept=".csv,text/csv" class="hide"></div>
+  <div class="field" style="margin-top:10px"><label>หรือวาง CSV</label><textarea id="iText" class="ptxt" style="min-height:140px"></textarea></div>
+  <p class="sm" id="iInfo"></p>
+  <button class="btn pri lg" id="iSave">💾 นำเข้าคลัง</button>
+</div></div>
+
+<!-- master prompt -->
+<div class="ovl" id="mPr"><div class="sheet">
+  <div class="row between"><h2 style="margin:0">🤖 Master Prompt สร้างข้อสอบด้วย AI</h2><button class="btn gho xs" data-close>✕</button></div>
+  <div class="field" style="margin-top:10px"><label>เนื้อหา / หัวข้อ / ตัวชี้วัด</label><textarea id="pTopic" placeholder="เช่น การอ่านจับใจความสำคัญ, ชนิดของคำ, ฉันทลักษณ์กลอนสุภาพ (ท 4.1 ม.4-6/1)"></textarea></div>
+  <div class="row">
+    <div class="grow field"><label>ระดับชั้น / กลุ่มเป้าหมาย</label><input id="pAud" placeholder="นักเรียนชั้น ม.4"></div>
+    <div class="grow field"><label>รหัสวิชา / ชื่อวิชา</label><input id="pSubj" placeholder="ท31101 ภาษาไทย 1"></div>
+  </div>
+  <div class="row">
+    <div class="grow field"><label>จำนวนข้อ</label><input type="number" id="pCnt" value="20"></div>
+    <div class="grow field"><label>ประเภท</label><select id="pType"><option value="mix">ผสม 4 ตัวเลือก + ถูก/ผิด</option><option value="mc" selected>4 ตัวเลือกอย่างเดียว</option><option value="tf">ถูก/ผิดอย่างเดียว</option></select></div>
+    <div class="grow field"><label>ระดับการคิด</label><select id="pLv"><option value="ผสมทุกระดับ จำ–เข้าใจ–ประยุกต์ใช้–วิเคราะห์">ผสม (Bloom)</option><option value="เน้นจำและเข้าใจ">จำ/เข้าใจ</option><option value="เน้นประยุกต์ใช้และวิเคราะห์">ประยุกต์/วิเคราะห์</option><option value="เน้นประเมินค่าและสร้างสรรค์">ประเมิน/สร้างสรรค์</option></select></div>
+  </div>
+  <label class="chk"><input type="checkbox" id="pOnet"> อิงแนวข้อสอบ O-NET / ข้อสอบกลาง</label>
+  <button class="btn pri lg" id="pGen" style="margin-top:10px">⚙️ Generate Master Prompt</button>
+  <div class="hide" id="pRes" style="margin-top:14px">
+    <div class="row between"><b>📋 Master Prompt</b><span class="badge ok" id="pLen"></span></div>
+    <textarea class="ptxt" id="pOut" readonly style="margin-top:8px"></textarea>
+    <div class="row" style="margin:10px 0"><button class="btn pri grow" id="pCopy">📋 คัดลอก Prompt</button><button class="btn gho" id="pDl">⬇ .txt</button></div>
+    <div class="ailinks"><a href="https://claude.ai/new" target="_blank" rel="noopener">🟠 Claude</a><a href="https://chatgpt.com/" target="_blank" rel="noopener">🟢 ChatGPT</a><a href="https://gemini.google.com/app" target="_blank" rel="noopener">🔵 Gemini</a></div>
+    <p class="muted sm">ได้ CSV แล้ว → ปุ่ม <b>⬆ นำเข้าข้อสอบ</b> แล้ววางหรือเลือกไฟล์</p>
+  </div>
+</div></div>
+
+<!-- guide / copy text -->
+<div class="ovl" id="mTxt"><div class="sheet">
+  <div class="row between"><h2 style="margin:0" id="mtTitle">📋 ข้อความ</h2><button class="btn gho xs" data-close>✕</button></div>
+  <textarea id="mtText" class="ptxt" style="margin-top:10px"></textarea>
+  <div class="row" style="margin-top:10px"><button class="btn pri grow" id="mtCopy">📋 คัดลอก</button><a class="btn okb" id="mtLine" target="_blank" rel="noopener">💬 ส่งทาง LINE</a></div>
+</div></div>
+
+<!-- share link -->
+<div class="ovl" id="mLink"><div class="sheet sm center">
+  <div class="row between"><h3 style="margin:0">🔗 ลิงก์ทำข้อสอบ</h3><button class="btn gho xs" data-close>✕</button></div>
+  <div id="lkQr" style="display:flex;justify-content:center;margin:14px 0"></div>
+  <input id="lkUrl" readonly>
+  <div class="row" style="margin-top:10px"><button class="btn pri grow" id="lkCopy">📋 คัดลอกลิงก์</button><a class="btn okb" id="lkLine" target="_blank" rel="noopener">💬 LINE</a></div>
+</div></div>
+
+<!-- student analysis (teacher) -->
+<div class="ovl" id="mAna"><div class="sheet" style="max-width:860px">
+  <div class="row between" style="margin-bottom:10px"><h3 style="margin:0">📊 ผลวิเคราะห์ผู้เรียนรายบุคคล</h3>
+    <div class="row"><button class="btn gho xs" id="anImg">🖼 บันทึกเป็นภาพ</button><button class="btn gho xs" id="anTxt">📋 คัดลอกข้อความแจ้งผู้เรียน</button><button class="btn gho xs" data-close>✕</button></div></div>
+  <div id="anaWrap"></div>
+</div></div>
+
+<!-- consent (pre-exam) -->
+<div class="ovl" id="mConsent"><div class="sheet sm center">
+  <div class="scan">🛡️</div>
+  <h2>ระบบเฝ้าระวังการทุจริตกำลังทำงาน</h2>
+  <p class="muted" style="margin-top:-4px">โปรดอ่านก่อนเริ่มทำข้อสอบ</p>
+  <div class="clist">
+    <div>🎙️ ระบบนี้ <b>ตรวจจับเสียงสนทนา</b> ระหว่างทำข้อสอบ</div>
+    <div>📡 ตรวจจับ <b>สัญญาณอุปกรณ์ข้างเคียงที่มีการใช้งานอินเทอร์เน็ต</b></div>
+    <div>🔀 บันทึกการ <b>สลับแท็บ / ออกจากหน้าจอ</b> ทุกครั้ง</div>
+    <div>📨 ระบบจะ <b>ส่งข้อมูลให้ครูผู้สอน</b> เพื่อตรวจสอบการทุจริต</div>
+  </div>
+  <label class="chk" style="justify-content:center;margin:14px 0"><input type="checkbox" id="cOk"> ข้าพเจ้ารับทราบ ยินยอม และจะทำข้อสอบด้วยตนเอง</label>
+  <button class="btn pri lg" id="cGo" disabled>ให้ความยินยอมและเริ่มทำข้อสอบ</button>
+  <button class="btn gho lg" id="cNo" style="margin-top:8px">ยกเลิก</button>
+</div></div>
+
+<!-- tab warn -->
+<div class="ovl" id="mWarn"><div class="sheet sm center">
+  <div style="font-size:3rem">⚠️</div>
+  <h2 style="color:var(--no)">ตรวจพบการออกจากหน้าข้อสอบ</h2>
+  <p id="wMsg"></p>
+  <button class="btn pri lg" data-close>กลับไปทำข้อสอบ</button>
+</div></div>
+
+<!-- confirm -->
+<div class="ovl" id="mConf"><div class="sheet sm center">
+  <h3 id="cfMsg"></h3>
+  <div class="row" style="margin-top:14px"><button class="btn gho grow" id="cfNo">ยกเลิก</button><button class="btn pri grow" id="cfYes">ยืนยัน</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc,
+  writeBatch, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* =======================================================================
+   ระบบคลังข้อสอบวิชาภาษาไทย
+   พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง
+   ======================================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyC6UQoFxr03HQdox54T1WIbOOA97Dl0yWk",
+  authDomain: "thaiexambank.firebaseapp.com",
+  projectId: "thaiexambank",
+  storageBucket: "thaiexambank.firebasestorage.app",
+  messagingSenderId: "633475162877",
+  appId: "1:633475162877:web:b7d0e7fa71949c304f5494"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const LOGO = 'https://nonthaphathr.github.io/uploadimg/logoexamsystem.png';
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),2800); }
+const openM = id => $('#'+id).classList.add('on');
+const closeM = id => $('#'+id).classList.remove('on');
+$$('[data-close]').forEach(b=>b.onclick=()=>b.closest('.ovl').classList.remove('on'));
+function confirmBox(msg){ return new Promise(res=>{ $('#cfMsg').textContent=msg; openM('mConf');
+  $('#cfYes').onclick=()=>{closeM('mConf');res(true)}; $('#cfNo').onclick=()=>{closeM('mConf');res(false)}; }); }
+async function copyText(t){ try{ await navigator.clipboard.writeText(t); }catch(e){ const a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); } toast('คัดลอกแล้ว ✅'); }
+function download(name, text, type='text/plain'){ const b=new Blob(['﻿'+text],{type:type+';charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const uniq = a => [...new Set(a)];
+const pct = (a,b) => b ? Math.round(a*1000/b)/10 : 0;
+const thNum = ['ก','ข','ค','ง'];
+function showView(id){ ['vLoad','vLogin','vBank','vBuild','vExams','vAna','vSet','vStu'].forEach(v=>$('#'+v).classList.toggle('hide',v!==id));
+  $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===id)); window.scrollTo({top:0}); }
+function textModal(title, text){ $('#mtTitle').textContent=title; $('#mtText').value=text;
+  $('#mtLine').href='https://line.me/R/share?text='+encodeURIComponent(text); openM('mTxt'); }
+$('#mtCopy').onclick=()=>copyText($('#mtText').value);
+$('#mtText').oninput=()=>$('#mtLine').href='https://line.me/R/share?text='+encodeURIComponent($('#mtText').value);
+const baseUrl = () => location.origin + location.pathname;
+const fmtDate = ts => { try{ const d=ts?.toDate?ts.toDate():new Date(ts); return d.toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}); }catch(e){ return '-'; } };
+
+/* ---------- CSV ---------- */
+function parseCSV(text){
+  text=text.replace(/^﻿/,''); const rows=[]; let r=[], f='', q=false;
+  for(let i=0;i<text.length;i++){ const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){ f+='"'; i++; } else q=false; } else f+=c; }
+    else if(c==='"') q=true; else if(c===','){ r.push(f); f=''; }
+    else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; r.push(f); rows.push(r); r=[]; f=''; }
+    else f+=c; }
+  if(f!==''||r.length){ r.push(f); rows.push(r); }
+  return rows.filter(x=>x.some(v=>v.trim()!==''));
+}
+const csvCell = v => { v=String(v??''); return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+const CSV_HEAD = ['ประเภท','คำถาม','ตัวเลือก1','ตัวเลือก2','ตัวเลือก3','ตัวเลือก4','เฉลย','คำอธิบาย','หัวข้อ','ระดับ'];
+function csvToItems(text, defTopic){
+  const rows=parseCSV(text); if(!rows.length) return {items:[],errors:['ไม่พบข้อมูล']};
+  const h=rows[0].map(x=>x.trim()); const ix=n=>h.indexOf(n);
+  let hasHead = ix('คำถาม')>=0;
+  const col = hasHead ? { t:ix('ประเภท'), q:ix('คำถาม'), o:[ix('ตัวเลือก1'),ix('ตัวเลือก2'),ix('ตัวเลือก3'),ix('ตัวเลือก4')], a:ix('เฉลย'), e:ix('คำอธิบาย'), tp:ix('หัวข้อ'), lv:ix('ระดับ') }
+                      : { t:0,q:1,o:[2,3,4,5],a:6,e:7,tp:8,lv:9 };
+  const items=[], errors=[];
+  rows.slice(hasHead?1:0).forEach((r,i)=>{
+    const g=k=>k>=0?(r[k]||'').trim():'';
+    let t=g(col.t).toLowerCase(); const q=g(col.q); if(!q){ errors.push(`แถว ${i+2}: ไม่มีคำถาม`); return; }
+    let o=col.o.map(g); if(t!=='tf') t='mc';
+    if(t==='tf'){ o=[o[0]||'ถูก', o[1]||'ผิด']; } else { o=o.filter(x=>x!==''); if(o.length<2){ errors.push(`แถว ${i+2}: ตัวเลือกไม่พอ`); return; } }
+    let a=parseInt(g(col.a),10); if(!(a>=1&&a<=o.length)){ errors.push(`แถว ${i+2}: เฉลยไม่ถูกต้อง`); return; }
+    items.push({ type:t, q, opts:o, ans:a-1, exp:g(col.e), topic:g(col.tp)||defTopic||'ทั่วไป', lv:g(col.lv)||'' });
+  });
+  return {items,errors};
+}
+
+/* ---------- auth ---------- */
+let UID=null, IS_ADMIN=false;
+const authReady = new Promise(res=>onAuthStateChanged(auth,u=>{ if(u){ UID=u.uid; res(u); } }));
+signInAnonymously(auth).catch(e=>{ console.error(e); $('#vLoad p').textContent='เชื่อมต่อไม่สำเร็จ: '+(e.code||e.message)+' (ตรวจว่าเปิด Anonymous Sign-in แล้ว)'; });
+
+const params = new URLSearchParams(location.search);
+const EID = params.get('e');
+
+authReady.then(async()=>{
+  if(EID) return studentInit(EID);
+  try{ const a=await getDoc(doc(db,'admins',UID)); IS_ADMIN=a.exists(); }catch(e){ IS_ADMIN=false; }
+  if(IS_ADMIN) return enterTeacher();
+  let setup=false; try{ setup=(await getDoc(doc(db,'meta','setup'))).exists(); }catch(e){}
+  if(!setup){ $('#loginHint').innerHTML='🎉 ใช้งานครั้งแรก — <b>ตั้งรหัสผ่านครู</b> สำหรับเข้าจัดการระบบ'; $('#lgPass2Wrap').classList.remove('hide'); $('#lgBtn').textContent='ตั้งรหัสผ่านและเข้าสู่ระบบ'; $('#lgBtn').dataset.setup='1'; }
+  showView('vLogin');
+});
+$('#lgPass').onkeydown=e=>{ if(e.key==='Enter') $('#lgBtn').click(); };
+$('#lgBtn').onclick=async()=>{
+  const p=$('#lgPass').value.trim(); if(p.length<6) return toast('รหัสผ่านอย่างน้อย 6 ตัวอักษร');
+  const btn=$('#lgBtn'); btn.disabled=true;
+  try{
+    if(btn.dataset.setup){ if(p!==$('#lgPass2').value.trim()){ btn.disabled=false; return toast('รหัสผ่านไม่ตรงกัน'); }
+      await setDoc(doc(db,'secure','admin'),{key:p}); await setDoc(doc(db,'admins',UID),{key:p,at:serverTimestamp()});
+      await setDoc(doc(db,'meta','setup'),{at:serverTimestamp()});
+    } else await setDoc(doc(db,'admins',UID),{key:p,at:serverTimestamp()});
+    IS_ADMIN=true; toast('เข้าสู่ระบบแล้ว ✅'); enterTeacher();
+  }catch(e){ console.error(e); toast('รหัสผ่านไม่ถูกต้อง'); }
+  btn.disabled=false;
+};
+$('#sChange').onclick=async()=>{ const p=$('#sNew').value.trim(); if(p.length<6) return toast('อย่างน้อย 6 ตัวอักษร');
+  try{ await updateDoc(doc(db,'secure','admin'),{key:p}); await setDoc(doc(db,'admins',UID),{key:p,at:serverTimestamp()}); $('#sNew').value=''; toast('เปลี่ยนรหัสแล้ว ✅'); }catch(e){ toast('ไม่สำเร็จ: '+e.code); } };
+$('#sLogout').onclick=async()=>{ if(!await confirmBox('ออกจากระบบเครื่องนี้?')) return; try{ await deleteDoc(doc(db,'admins',UID)); }catch(e){} location.reload(); };
+
+/* =======================================================================
+   TEACHER
+   ======================================================================= */
+let BANK=[], EXAMS=[], SEL=new Set();
+async function enterTeacher(){
+  $('#nav').classList.remove('hide');
+  $$('#nav button').forEach(b=>b.onclick=()=>{ showView(b.dataset.v); if(b.dataset.v==='vBuild') renderBuild(); if(b.dataset.v==='vExams') loadExams(); if(b.dataset.v==='vAna') anaInit(); });
+  showView('vBank'); await loadBank();
+}
+async function loadBank(){
+  try{ const s=await getDocs(collection(db,'bank')); BANK=s.docs.map(d=>({id:d.id,...d.data()})); }
+  catch(e){ console.error(e); toast('โหลดคลังไม่สำเร็จ: '+e.code); }
+  BANK.sort((a,b)=>(a.term+a.code+a.topic).localeCompare(b.term+b.code+b.topic,'th') || (a.ts||0)-(b.ts||0));
+  renderBank();
+}
+const termSort = (a,b)=>{ const [x1,y1]=a.split('/'), [x2,y2]=b.split('/'); return (y2||0)-(y1||0) || (x2||0)-(x1||0); };
+function fillSel(el, arr, all, keep){ const v=keep??el.value; el.innerHTML=`<option value="">${all}</option>`+arr.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join(''); if(arr.includes(v)) el.value=v; }
+function subjName(code){ const q=BANK.find(b=>b.code===code&&b.subj); return q?q.subj:''; }
+function renderBank(){
+  const terms=uniq(BANK.map(b=>b.term)).sort(termSort), codes=uniq(BANK.map(b=>b.code)).sort();
+  $('#bankStats').innerHTML=[
+    ['ข้อสอบทั้งหมด',BANK.length],['ภาคเรียน',terms.length],['รายวิชา',codes.length],['หัวข้อ',uniq(BANK.map(b=>b.code+'|'+b.topic)).length]
+  ].map(([l,v])=>`<div class="stat"><div class="v">${v.toLocaleString()}</div><div class="l">${l}</div></div>`).join('');
+  $('#bankTree').innerHTML = terms.length ? terms.map(t=>{
+    const cs=uniq(BANK.filter(b=>b.term===t).map(b=>b.code)).sort();
+    return `<div style="width:100%"><b style="font-family:Prompt;color:var(--orD)">📅 ภาคเรียนที่ ${esc(t)}</b><div class="tree" style="margin:6px 0 10px">`+
+      cs.map(c=>`<div class="tnode" data-t="${esc(t)}" data-c="${esc(c)}"><b>${esc(c)}</b> ${esc(subjName(c))} · ${BANK.filter(b=>b.term===t&&b.code===c).length} ข้อ</div>`).join('')+`</div></div>`;
+  }).join('') : '<span class="muted sm">ยังไม่มีข้อมูล</span>';
+  $$('#bankTree .tnode').forEach(n=>n.onclick=()=>{ $('#fTerm').value=n.dataset.t; fillFilters(); $('#fCode').value=n.dataset.c; fillFilters(); drawBankTable(); });
+  fillSel($('#fTerm'),terms,'ทุกภาคเรียน'); fillFilters(); drawBankTable();
+}
+function fillFilters(){
+  const t=$('#fTerm').value; const inT=BANK.filter(b=>!t||b.term===t);
+  fillSel($('#fCode'),uniq(inT.map(b=>b.code)).sort(),'ทุกรหัสวิชา');
+  const c=$('#fCode').value; fillSel($('#fTopic'),uniq(inT.filter(b=>!c||b.code===c).map(b=>b.topic)).sort(),'ทุกหัวข้อ');
+}
+function filtered(){ const t=$('#fTerm').value,c=$('#fCode').value,tp=$('#fTopic').value,q=$('#fQ').value.trim().toLowerCase();
+  return BANK.filter(b=>(!t||b.term===t)&&(!c||b.code===c)&&(!tp||b.topic===tp)&&(!q||(b.q+' '+b.opts.join(' ')).toLowerCase().includes(q))); }
+function drawBankTable(){
+  const L=filtered(); $('#fCount').textContent=`แสดง ${L.length} ข้อ · เลือกไว้ ${SEL.size} ข้อ`;
+  $('#bankEmpty').classList.toggle('hide',BANK.length>0);
+  $('#bankBody').innerHTML=L.slice(0,500).map(b=>`<tr>
+    <td><input type="checkbox" class="sel" data-id="${b.id}" ${SEL.has(b.id)?'checked':''}></td>
+    <td><div class="qtxt">${esc(b.q)}</div><div class="opts">${b.opts.map((o,i)=>`<span class="${i===b.ans?'c':''}">${b.type==='tf'?'':thNum[i]+'. '}${esc(o)}${i===b.ans?' ✓':''}</span>`).join(' &nbsp; ')}</div></td>
+    <td><span class="badge">${esc(b.topic)}</span>${b.lv?`<br><span class="badge gr" style="margin-top:4px">${esc(b.lv)}</span>`:''}</td>
+    <td class="sm">${esc(b.code)}<br><span class="muted">${esc(b.term)}</span></td>
+    <td><button class="btn gho xs" data-ed="${b.id}">✏️</button> <button class="btn dan xs" data-del="${b.id}">🗑</button></td></tr>`).join('')
+    + (L.length>500?`<tr><td colspan="5" class="muted center">แสดง 500 ข้อแรก — ใช้ตัวกรองเพื่อแคบลง</td></tr>`:'');
+  $$('#bankBody .sel').forEach(c=>c.onchange=()=>{ c.checked?SEL.add(c.dataset.id):SEL.delete(c.dataset.id); $('#fCount').textContent=`แสดง ${L.length} ข้อ · เลือกไว้ ${SEL.size} ข้อ`; });
+  $$('#bankBody [data-ed]').forEach(b=>b.onclick=()=>editQ(b.dataset.ed));
+  $$('#bankBody [data-del]').forEach(b=>b.onclick=async()=>{ if(!await confirmBox('ลบข้อสอบข้อนี้?')) return;
+    try{ await deleteDoc(doc(db,'bank',b.dataset.del)); BANK=BANK.filter(x=>x.id!==b.dataset.del); SEL.delete(b.dataset.del); renderBank(); toast('ลบแล้ว'); }catch(e){ toast('ลบไม่สำเร็จ'); } });
+}
+['#fTerm','#fCode'].forEach(s=>$(s).onchange=()=>{ fillFilters(); drawBankTable(); });
+$('#fTopic').onchange=drawBankTable; $('#fQ').oninput=drawBankTable;
+$('#selAll').onchange=e=>{ filtered().forEach(b=>e.target.checked?SEL.add(b.id):SEL.delete(b.id)); drawBankTable(); };
+$('#bDelSel').onclick=async()=>{ if(!SEL.size) return toast('ยังไม่ได้เลือก'); if(!await confirmBox(`ลบข้อสอบที่เลือก ${SEL.size} ข้อ?`)) return;
+  const ids=[...SEL]; for(let i=0;i<ids.length;i+=400){ const bt=writeBatch(db); ids.slice(i,i+400).forEach(id=>bt.delete(doc(db,'bank',id))); await bt.commit(); }
+  BANK=BANK.filter(b=>!SEL.has(b.id)); SEL.clear(); renderBank(); toast('ลบแล้ว'); };
+
+/* edit / add question */
+let EDIT_ID=null;
+function syncQType(){ const tf=$('#qType').value==='tf'; $$('.qo34').forEach(x=>x.classList.toggle('hide',tf));
+  const o=$$('.qo'); if(tf){ if(!o[0].value) o[0].value='ถูก'; if(!o[1].value) o[1].value='ผิด'; }
+  [...$('#qAns').options].forEach((op,i)=>op.hidden=tf&&i>1); if(tf&&+$('#qAns').value>1) $('#qAns').value='0'; }
+$('#qType').onchange=syncQType;
+function editQ(id){
+  EDIT_ID=id||null; const b=id?BANK.find(x=>x.id===id):{term:$('#fTerm').value,code:$('#fCode').value,subj:subjName($('#fCode').value),topic:$('#fTopic').value,type:'mc',q:'',opts:['','','',''],ans:0,exp:'',lv:'เข้าใจ'};
+  $('#mqTitle').textContent=id?'แก้ไขข้อสอบ':'เพิ่มข้อสอบ';
+  $('#qTerm').value=b.term||''; $('#qCode').value=b.code||''; $('#qSubj').value=b.subj||''; $('#qTopic').value=b.topic||'';
+  $('#qType').value=b.type; $('#qLv').value=b.lv||'เข้าใจ'; $('#qQ').value=b.q; $$('.qo').forEach((x,i)=>x.value=b.opts[i]||''); $('#qAns').value=b.ans; $('#qExp').value=b.exp||'';
+  syncQType(); openM('mQ');
+}
+$('#bAdd').onclick=()=>editQ(null);
+$('#qSave').onclick=async()=>{
+  const type=$('#qType').value; let opts=$$('.qo').map(x=>x.value.trim()); opts=type==='tf'?opts.slice(0,2):opts.filter(Boolean);
+  const d={ term:$('#qTerm').value.trim(), code:$('#qCode').value.trim().toUpperCase().replace(/\s/g,'').replace(/^([ก-ฮ])/, m=>m), subj:$('#qSubj').value.trim(),
+    topic:$('#qTopic').value.trim()||'ทั่วไป', type, lv:$('#qLv').value, q:$('#qQ').value.trim(), opts, ans:+$('#qAns').value, exp:$('#qExp').value.trim() };
+  if(!d.term||!d.code||!d.q) return toast('กรอกภาคเรียน รหัสวิชา และคำถาม');
+  if(opts.length<2||d.ans>=opts.length) return toast('ตัวเลือก/เฉลยไม่ครบ');
+  try{
+    if(EDIT_ID){ await updateDoc(doc(db,'bank',EDIT_ID),d); Object.assign(BANK.find(x=>x.id===EDIT_ID),d); }
+    else { d.ts=Date.now(); const r=await addDoc(collection(db,'bank'),d); BANK.push({id:r.id,...d}); }
+    closeM('mQ'); renderBank(); toast('บันทึกแล้ว ✅');
+  }catch(e){ console.error(e); toast('บันทึกไม่สำเร็จ: '+e.code); }
+};
+
+/* import */
+let IMP=[];
+$('#bImport').onclick=()=>{ $('#iTerm').value=$('#fTerm').value; $('#iCode').value=$('#fCode').value; $('#iSubj').value=subjName($('#fCode').value); $('#iText').value=''; $('#iInfo').textContent=''; IMP=[]; openM('mImp'); };
+$('#iDrop').onclick=()=>$('#iFile').click();
+$('#iDrop').ondragover=e=>{ e.preventDefault(); };
+$('#iDrop').ondrop=async e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f){ $('#iText').value=await f.text(); impParse(); } };
+$('#iFile').onchange=async e=>{ const f=e.target.files[0]; if(f){ $('#iText').value=await f.text(); impParse(); } e.target.value=''; };
+$('#iText').oninput=impParse; $('#iTopic').oninput=impParse;
+function impParse(){ let t=$('#iText').value; const m=t.match(/```(?:csv)?\s*([\s\S]*?)```/); if(m) t=m[1];
+  const {items,errors}=csvToItems(t,$('#iTopic').value.trim()); IMP=items;
+  $('#iInfo').innerHTML=`พบข้อสอบที่ใช้ได้ <b style="color:var(--ok)">${items.length}</b> ข้อ`+(errors.length?` · ข้าม ${errors.length} แถว<br><span class="muted">${esc(errors.slice(0,5).join(' | '))}</span>`:'')
+    +(items.length?` · หัวข้อ: ${esc(uniq(items.map(i=>i.topic)).join(', '))}`:''); }
+$('#iSave').onclick=async()=>{
+  const term=$('#iTerm').value.trim(), code=$('#iCode').value.trim().replace(/\s/g,''), subj=$('#iSubj').value.trim();
+  if(!term||!code) return toast('กรอกภาคเรียนและรหัสวิชา'); if(!IMP.length) return toast('ยังไม่มีข้อสอบที่นำเข้าได้');
+  const btn=$('#iSave'); btn.disabled=true; btn.textContent='กำลังนำเข้า...';
+  try{ const now=Date.now(); const added=[];
+    for(let i=0;i<IMP.length;i+=400){ const bt=writeBatch(db);
+      IMP.slice(i,i+400).forEach((it,k)=>{ const r=doc(collection(db,'bank')); const d={...it,term,code,subj,ts:now+i+k}; bt.set(r,d); added.push({id:r.id,...d}); });
+      await bt.commit(); }
+    BANK.push(...added); closeM('mImp'); $('#fTerm').value=term; renderBank(); toast(`นำเข้า ${added.length} ข้อแล้ว ✅`);
+  }catch(e){ console.error(e); toast('นำเข้าไม่สำเร็จ: '+e.code); }
+  btn.disabled=false; btn.textContent='💾 นำเข้าคลัง';
+};
+$('#bExport').onclick=()=>{ const L=filtered(); if(!L.length) return toast('ไม่มีข้อมูล');
+  const rows=[['ภาคเรียน','รหัสวิชา','ชื่อวิชา',...CSV_HEAD].join(',')].concat(L.map(b=>[b.term,b.code,b.subj,b.type,b.q,b.opts[0],b.opts[1],b.opts[2]||'',b.opts[3]||'',b.ans+1,b.exp,b.topic,b.lv].map(csvCell).join(',')));
+  download('คลังข้อสอบ-'+($('#fCode').value||'ทั้งหมด')+'.csv',rows.join('\n'),'text/csv'); };
+$('#bTpl').onclick=()=>download('template-คลังข้อสอบ.csv',[CSV_HEAD.join(','),
+  'mc,ข้อใดใช้คำราชาศัพท์ถูกต้อง,พระราชาเสวยพระกระยาหาร,พระราชาทรงเสวย,พระราชาทรงรับประทาน,พระราชากินข้าว,1,"เสวย เป็นกริยาราชาศัพท์อยู่แล้ว ไม่ต้องเติม ทรง",คำราชาศัพท์,เข้าใจ',
+  'tf,"คำว่า ""ขนม"" ต้องประวิสรรชนีย์",ถูก,ผิด,,,2,ขนม ออกเสียง อะ กึ่งเสียง จึงไม่ประวิสรรชนีย์,การประวิสรรชนีย์,จำ'].join('\n'),'text/csv');
+
+/* master prompt */
+$('#bPrompt').onclick=()=>{ if(!$('#pSubj').value&&$('#fCode').value) $('#pSubj').value=$('#fCode').value+' '+subjName($('#fCode').value); openM('mPr'); };
+function buildPrompt(){
+  const topic=$('#pTopic').value.trim(), aud=$('#pAud').value.trim()||'นักเรียนระดับมัธยมศึกษา', subj=$('#pSubj').value.trim()||'ภาษาไทย';
+  const n=Math.max(1,parseInt($('#pCnt').value)||20), type=$('#pType').value, lv=$('#pLv').value;
+  const nMc = type==='mc'?n: type==='tf'?0: Math.round(n*0.7), nTf=n-nMc;
+  const mix = type==='mc'?`4 ตัวเลือก (mc) ทั้งหมด ${n} ข้อ`: type==='tf'?`ถูก/ผิด (tf) ทั้งหมด ${n} ข้อ`:`4 ตัวเลือก (mc) ${nMc} ข้อ และถูก/ผิด (tf) ${nTf} ข้อ คละกัน`;
+  return `บทบาท: คุณเป็นผู้เชี่ยวชาญด้านการวัดและประเมินผลกลุ่มสาระการเรียนรู้ภาษาไทย ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน พ.ศ. 2551 (ฉบับปรับปรุง พ.ศ. 2560)
+
+# ภารกิจ
+ออกข้อสอบวิชา ${subj} จำนวน ${n} ข้อ
+เนื้อหา/ตัวชี้วัด: ${topic}
+กลุ่มเป้าหมาย: ${aud}
+ระดับพฤติกรรมการคิด: ${lv}
+สัดส่วน: ${mix}${$('#pOnet').checked?'\nแนวข้อสอบ: อิงรูปแบบและความยากของข้อสอบ O-NET / ข้อสอบกลาง':''}
+
+# ⚠️ ข้อกำหนดสำคัญ (ห้ามละเมิด)
+1. ค้นอินเทอร์เน็ตตรวจสอบเนื้อหาจากแหล่งที่เชื่อถือได้ (ราชบัณฑิตยสภา พจนานุกรมฉบับราชบัณฑิตยสถาน หนังสือเรียน สพฐ./สสวท. เอกสารวิชาการ) ก่อนออกข้อสอบ
+2. ห้ามแต่งข้อมูลขึ้นเอง ห้ามอ้างคำประพันธ์ ชื่อผู้แต่ง หรือหลักเกณฑ์ที่ไม่มีแหล่งยืนยัน หากไม่แน่ใจให้ตัดข้อนั้นทิ้งแล้วออกข้อใหม่
+3. การสะกดคำ วรรณยุกต์ และคำราชาศัพท์ต้องถูกต้องตามพจนานุกรมฉบับราชบัณฑิตยสถาน
+4. คำตอบถูกมีเพียงข้อเดียว ตัวลวงต้องสมเหตุสมผลและผิดอย่างชัดเจน
+5. ทุกข้อต้องระบุ "หัวข้อ" (ชื่อเรื่อง/ตัวชี้วัดย่อยสั้น ๆ ไม่เกิน 30 ตัวอักษร ใช้ชื่อเดียวกันกับข้อที่อยู่เรื่องเดียวกัน) เพื่อใช้วิเคราะห์จุดแข็ง–จุดอ่อนของผู้เรียน
+6. ทุกข้อมีคำอธิบายเฉลย 1–2 บรรทัด อิงหลักภาษาจริง
+
+# รูปแบบผลลัพธ์ (นำเข้าระบบได้ทันที)
+ส่งเป็นไฟล์ CSV (UTF-8) ชื่อ ${subj.replace(/\s+/g,'_').slice(0,30)}.csv ถ้าสร้างไฟล์ไม่ได้ให้พิมพ์ทั้งหมดใน code block เดียว
+บรรทัดแรกต้องเป็นหัวตารางนี้เป๊ะ:
+${CSV_HEAD.join(',')}
+
+กติกา:
+- ประเภท: mc หรือ tf เท่านั้น
+- mc: กรอกตัวเลือก1–4 ครบ, เฉลย = เลข 1–4
+- tf: ตัวเลือก1 = ถูก, ตัวเลือก2 = ผิด, ตัวเลือก3–4 เว้นว่าง, เฉลย = 1 หรือ 2
+- ระดับ: จำ / เข้าใจ / ประยุกต์ใช้ / วิเคราะห์ / ประเมินค่า / สร้างสรรค์
+- ข้อความที่มีจุลภาค (,) หรือเครื่องหมายคำพูด ให้ครอบด้วย " " ตามมาตรฐาน CSV (คำพูดภายในใช้ "")
+- ห้ามใส่เลขข้อ ห้ามเพิ่มคอลัมน์ ห้ามบรรทัดว่าง ห้ามข้อความอื่นปนใน CSV
+
+# ตรวจสอบก่อนส่ง
+- [ ] ครบ ${n} ข้อ สัดส่วนถูกต้อง
+- [ ] เฉลยตรงตำแหน่งตัวเลือก และถูกต้องตามหลักวิชา
+- [ ] หัวตาราง 10 คอลัมน์ตรงตามกำหนด ทุกข้อมีหัวข้อ
+
+หลัง CSV ให้แสดงรายการแหล่งอ้างอิง (URL) ที่ใช้จริงแยกไว้ด้านล่าง`;
+}
+$('#pGen').onclick=()=>{ if(!$('#pTopic').value.trim()) return toast('กรอกเนื้อหา/หัวข้อก่อน'); const t=buildPrompt(); $('#pOut').value=t; $('#pLen').textContent=t.length.toLocaleString()+' ตัวอักษร'; $('#pRes').classList.remove('hide'); };
+$('#pCopy').onclick=()=>copyText($('#pOut').value);
+$('#pDl').onclick=()=>download('master-prompt.txt',$('#pOut').value);
+
+/* guide from bank filter */
+function guideText({title,subj,term,items,timeMin,link,note}){
+  const tp={}; items.forEach(i=>tp[i.topic]=(tp[i.topic]||0)+1);
+  const nMc=items.filter(i=>i.type!=='tf').length, nTf=items.length-nMc;
+  return `📢 แจ้งแนวข้อสอบ${title?' : '+title:''}
+📘 วิชา ${subj||'-'}${term?'  ภาคเรียนที่ '+term:''}
+📝 จำนวน ${items.length} ข้อ${timeMin?` · เวลา ${timeMin} นาที`:''}
+${nMc?`   • ปรนัย 4 ตัวเลือก ${nMc} ข้อ\n`:''}${nTf?`   • ถูก/ผิด ${nTf} ข้อ\n`:''}
+🎯 หัวข้อที่ออกสอบ
+${Object.entries(tp).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`   ✅ ${k} (${v} ข้อ)`).join('\n')}
+
+📌 ข้อปฏิบัติ
+   • ทำข้อสอบด้วยตนเอง ห้ามสลับแท็บหรือออกจากหน้าจอ
+   • ระบบตรวจจับการทุจริตและรายงานครูผู้สอน${note?'\n   • '+note:''}
+${link?`\n🔗 ลิงก์ทำข้อสอบ\n${link}\n`:''}
+ครูนนทพัทธ์ หิรัญเรือง`;
+}
+$('#bGuideBank').onclick=()=>{ const L=SEL.size?BANK.filter(b=>SEL.has(b.id)):filtered(); if(!L.length) return toast('ไม่มีข้อสอบ');
+  const c=$('#fCode').value; textModal('📋 แจ้งแนวข้อสอบ',guideText({subj:c?c+' '+subjName(c):uniq(L.map(x=>x.code)).join(', '),term:$('#fTerm').value,items:L})); };
+$('#bToBuild').onclick=()=>{ if(!SEL.size) return toast('เลือกข้อสอบในตารางก่อน'); showView('vBuild'); $('#xSrc').value='sel'; renderBuild(); };
+
+/* =======================================================================
+   BUILD
+   ======================================================================= */
+const XT=new Set(), XC=new Set(); let PREV=null;
+$('#xSrc').onchange=renderBuild;
+function renderBuild(){
+  const sel=$('#xSrc').value==='sel'; $('#xRandBox').classList.toggle('hide',sel); $('#xSelInfo').classList.toggle('hide',!sel);
+  if(sel){ $('#xSelInfo').textContent=`ใช้ข้อที่เลือกไว้ในคลัง ${SEL.size} ข้อ`+(SEL.size?'':' (ไปที่คลังข้อสอบแล้วติ๊กเลือก)'); }
+  const terms=uniq(BANK.map(b=>b.term)).sort(termSort);
+  $('#xTerms').innerHTML=terms.map(t=>`<div class="tnode ${XT.has(t)?'on':''}" data-t="${esc(t)}">${esc(t)}</div>`).join('')||'<span class="muted sm">คลังว่าง</span>';
+  const inT=BANK.filter(b=>!XT.size||XT.has(b.term)); const codes=uniq(inT.map(b=>b.code)).sort();
+  [...XC].forEach(c=>{ if(!codes.includes(c)) XC.delete(c); });
+  $('#xCodes').innerHTML=codes.map(c=>`<div class="tnode ${XC.has(c)?'on':''}" data-c="${esc(c)}"><b>${esc(c)}</b> ${esc(subjName(c))}</div>`).join('');
+  $$('#xTerms .tnode').forEach(n=>n.onclick=()=>{ XT.has(n.dataset.t)?XT.delete(n.dataset.t):XT.add(n.dataset.t); renderBuild(); });
+  $$('#xCodes .tnode').forEach(n=>n.onclick=()=>{ XC.has(n.dataset.c)?XC.delete(n.dataset.c):XC.add(n.dataset.c); renderBuild(); });
+  const pool=buildPool(); $('#xPool').value=pool.length+' ข้อ';
+  const tp={}; pool.forEach(b=>tp[b.topic]=(tp[b.topic]||0)+1);
+  const old={}; $$('#xTopics input').forEach(i=>old[i.dataset.tp]=i.value);
+  $('#xTopics').innerHTML=Object.keys(tp).sort().map(k=>`<div class="row" style="margin-bottom:6px"><span class="grow sm">${esc(k)} <span class="muted">(มี ${tp[k]})</span></span><input type="number" min="0" max="${tp[k]}" data-tp="${esc(k)}" value="${old[k]??''}" style="width:90px"></div>`).join('')||'<span class="muted sm">เลือกรหัสวิชาก่อน</span>';
+  if(!$('#xSubj').value && XC.size===1){ const c=[...XC][0]; $('#xSubj').value=c+' '+subjName(c); }
+  if(!$('#xTerm').value && terms[0]) $('#xTerm').value=terms[0];
+}
+function buildPool(){ return BANK.filter(b=>(!XT.size||XT.has(b.term))&&XC.has(b.code)); }
+function drawQuestions(){
+  if($('#xSrc').value==='sel') return BANK.filter(b=>SEL.has(b.id));
+  const pool=buildPool(); const tot=parseInt($('#xTotal').value)||0;
+  if(tot>0) return shuffle(pool).slice(0,tot);
+  let out=[]; $$('#xTopics input').forEach(i=>{ const n=parseInt(i.value)||0; if(n>0) out.push(...shuffle(pool.filter(b=>b.topic===i.dataset.tp)).slice(0,n)); });
+  return out;
+}
+$('#xPreview').onclick=()=>{ PREV=drawQuestions(); if(!PREV.length) return toast('ยังไม่ได้ระบุจำนวนข้อ/ไม่มีข้อสอบ');
+  $('#xPrevCard').classList.remove('hide'); $('#xPrevN').textContent=PREV.length+' ข้อ';
+  $('#xPrevList').innerHTML=PREV.map((b,i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${i+1}.</b> ${esc(b.q)} <span class="badge">${esc(b.topic)}</span><div class="opts">${b.opts.map((o,k)=>`<span class="${k===b.ans?'c':''}">${esc(o)}</span>`).join(' · ')}</div></div>`).join(''); };
+$('#xCreate').onclick=async()=>{
+  const qs=PREV&&PREV.length?PREV:drawQuestions(); if(!qs.length) return toast('ยังไม่มีข้อสอบในชุด');
+  const title=$('#xTitle').value.trim(); if(!title) return toast('ตั้งชื่อชุดข้อสอบก่อน');
+  const btn=$('#xCreate'); btn.disabled=true;
+  try{
+    const ref=doc(collection(db,'exams'));
+    const pub={ title, term:$('#xTerm').value.trim(), subj:$('#xSubj').value.trim(), n:qs.length, timeMin:Math.max(0,parseInt($('#xTime').value)||0),
+      maxSw:Math.max(0,parseInt($('#xSw').value)||0), shufQ:$('#xShufQ').checked, shufO:$('#xShufO').checked, showScore:$('#xShow').checked, consent:$('#xConsent').checked,
+      note:$('#xNote').value.trim(), open:true, createdAt:serverTimestamp(), ts:Date.now(),
+      qs:qs.map(b=>({t:b.type,q:b.q,o:b.opts,tp:b.topic,lv:b.lv||''})) };
+    await setDoc(ref,pub);
+    await setDoc(doc(db,'exams',ref.id,'private','key'),{ key:qs.map(b=>b.ans), exp:qs.map(b=>b.exp||''), qids:qs.map(b=>b.id) });
+    PREV=null; $('#xPrevCard').classList.add('hide'); toast('สร้างข้อสอบแล้ว ✅');
+    showView('vExams'); await loadExams(); showLink(ref.id);
+  }catch(e){ console.error(e); toast('สร้างไม่สำเร็จ: '+e.code); }
+  btn.disabled=false;
+};
+
+/* =======================================================================
+   EXAMS
+   ======================================================================= */
+async function loadExams(){
+  try{ const s=await getDocs(collection(db,'exams')); EXAMS=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.ts||0)-(a.ts||0)); }catch(e){ toast('โหลดไม่สำเร็จ'); }
+  $('#examEmpty').classList.toggle('hide',EXAMS.length>0);
+  $('#examList').innerHTML=EXAMS.map(x=>`<div class="card examc">
+    <div class="row between"><div><h3 style="margin:0">${esc(x.title)}</h3>
+      <p class="muted sm" style="margin:2px 0 0">${esc(x.subj)} · ภาคเรียน ${esc(x.term)} · ${x.n} ข้อ · ${x.timeMin?x.timeMin+' นาที':'ไม่จำกัดเวลา'} · สลับแท็บได้ ${x.maxSw} ครั้ง · ${fmtDate(x.createdAt)}</p></div>
+      <span class="badge ${x.open?'ok':'no'}">${x.open?'● เปิดรับคำตอบ':'● ปิดแล้ว'}</span></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn pri xs" data-lk="${x.id}">🔗 ลิงก์ / QR</button>
+      <button class="btn gho xs" data-gd="${x.id}">📋 คัดลอกแจ้งแนวข้อสอบ (LINE)</button>
+      <button class="btn gho xs" data-an="${x.id}">📊 ผลสอบ/วิเคราะห์</button>
+      <button class="btn gho xs" data-op="${x.id}">${x.open?'⏸ ปิดรับ':'▶ เปิดรับ'}</button>
+      <button class="btn gho xs" data-ss="${x.id}">${x.showScore?'🙈 ซ่อนคะแนน':'👁 แสดงคะแนน'}</button>
+      <button class="btn dan xs" data-dl="${x.id}">🗑 ลบ</button>
+    </div></div>`).join('');
+  const X=id=>EXAMS.find(e=>e.id===id);
+  $$('[data-lk]').forEach(b=>b.onclick=()=>showLink(b.dataset.lk));
+  $$('[data-gd]').forEach(b=>b.onclick=()=>{ const x=X(b.dataset.gd); textModal('📋 แจ้งแนวข้อสอบ (ส่ง LINE)',guideText({title:x.title,subj:x.subj,term:x.term,timeMin:x.timeMin,note:x.note,items:x.qs.map(q=>({topic:q.tp,type:q.t})),link:baseUrl()+'?e='+x.id})); });
+  $$('[data-an]').forEach(b=>b.onclick=()=>{ showView('vAna'); anaInit(b.dataset.an); });
+  $$('[data-op]').forEach(b=>b.onclick=async()=>{ const x=X(b.dataset.op); await updateDoc(doc(db,'exams',x.id),{open:!x.open}); loadExams(); });
+  $$('[data-ss]').forEach(b=>b.onclick=async()=>{ const x=X(b.dataset.ss); await updateDoc(doc(db,'exams',x.id),{showScore:!x.showScore}); loadExams(); });
+  $$('[data-dl]').forEach(b=>b.onclick=async()=>{ const x=X(b.dataset.dl); if(!await confirmBox(`ลบ "${x.title}" และผลสอบทั้งหมด?`)) return;
+    try{ const s=await getDocs(collection(db,'exams',x.id,'subs')); const bt=writeBatch(db); s.docs.forEach(d=>bt.delete(d.ref)); bt.delete(doc(db,'exams',x.id,'private','key')); bt.delete(doc(db,'exams',x.id)); await bt.commit(); toast('ลบแล้ว'); loadExams(); }catch(e){ toast('ลบไม่สำเร็จ'); } });
+}
+$('#eReload').onclick=loadExams;
+function showLink(id){ const u=baseUrl()+'?e='+id; $('#lkUrl').value=u; $('#lkQr').innerHTML='';
+  try{ new QRCode($('#lkQr'),{text:u,width:200,height:200,colorDark:'#9a3412'}); }catch(e){}
+  $('#lkLine').href='https://line.me/R/share?text='+encodeURIComponent('📝 ลิงก์ทำข้อสอบ\n'+u); openM('mLink'); }
+$('#lkCopy').onclick=()=>copyText($('#lkUrl').value);
+
+/* =======================================================================
+   SCORING + ANALYSIS (ใช้ร่วมครู/นักเรียน)
+   ======================================================================= */
+function gradeSub(ex, key, sub){
+  const ans=sub.ans||{}; const per=ex.qs.map((q,i)=>({i, q, ok: ans[i]!==undefined && +ans[i]===key.key[i], answered: ans[i]!==undefined, pick: ans[i]}));
+  const score=per.filter(p=>p.ok).length;
+  const topics={}; per.forEach(p=>{ const t=p.q.tp||'ทั่วไป'; topics[t]=topics[t]||{n:0,c:0}; topics[t].n++; if(p.ok) topics[t].c++; });
+  const lvls={}; per.forEach(p=>{ const t=p.q.lv||'ไม่ระบุ'; lvls[t]=lvls[t]||{n:0,c:0}; lvls[t].n++; if(p.ok) lvls[t].c++; });
+  return { score, n:ex.qs.length, p:pct(score,ex.qs.length), per, topics, lvls };
+}
+function levelOf(p){ return p>=80?['ดีเยี่ยม','ok','#16a34a']: p>=70?['ดี','ok','#22c55e']: p>=50?['พอใช้','wa','#d97706']: ['ควรปรับปรุง','no','#dc2626']; }
+const barColor = p => p>=75?'#22c55e':p>=50?'#f59e0b':'#ef4444';
+function adviceFor(g, sub, clsAvg){
+  const T=Object.entries(g.topics).map(([k,v])=>({k,...v,p:pct(v.c,v.n)}));
+  const strong=T.filter(t=>t.p>=75).sort((a,b)=>b.p-a.p), weak=T.filter(t=>t.p<50).sort((a,b)=>a.p-b.p), mid=T.filter(t=>t.p>=50&&t.p<75);
+  const adv=[];
+  if(g.p>=80) adv.push('ผลการสอบอยู่ในระดับดีเยี่ยม ควรรักษามาตรฐาน และฝึกทำข้อสอบระดับวิเคราะห์–ประเมินค่าเพิ่มเติม เช่น แนวข้อสอบ O-NET');
+  else if(g.p>=50) adv.push('ผลการสอบผ่านเกณฑ์ ควรทบทวนหัวข้อที่ยังได้คะแนนต่ำเพื่อยกระดับผลสัมฤทธิ์');
+  else adv.push('ผลการสอบยังต่ำกว่าเกณฑ์ ควรทบทวนเนื้อหาพื้นฐานอย่างเป็นระบบ และขอคำปรึกษาจากครูผู้สอน/สอบซ่อมเสริม');
+  weak.forEach(t=>adv.push(`ทบทวนเรื่อง “${t.k}” (ตอบถูก ${t.c}/${t.n}) — อ่านสรุปเนื้อหา ทำแบบฝึกหัดเพิ่ม 10–15 ข้อ และจดหลักการสำคัญในสมุดโน้ต`));
+  mid.forEach(t=>adv.push(`เรื่อง “${t.k}” เข้าใจพอสมควร (${t.p}%) ฝึกโจทย์ประยุกต์ใช้เพิ่มเติมเพื่อความแม่นยำ`));
+  const L=g.lvls; const hi=['วิเคราะห์','ประเมินค่า','สร้างสรรค์'].reduce((a,k)=>L[k]?{n:a.n+L[k].n,c:a.c+L[k].c}:a,{n:0,c:0});
+  if(hi.n>=2 && pct(hi.c,hi.n)<50) adv.push('ข้อสอบระดับการคิดขั้นสูง (วิเคราะห์/ประเมินค่า) ยังทำได้น้อย ควรฝึกอ่านโจทย์อย่างละเอียด ขีดเส้นใต้คำสำคัญ และตัดตัวเลือกที่ผิดทีละข้อ');
+  const blank=g.per.filter(p=>!p.answered).length; if(blank) adv.push(`มีข้อที่ไม่ได้ตอบ ${blank} ข้อ ควรบริหารเวลาให้ตอบครบทุกข้อ`);
+  if((sub.sw||0)>0) adv.push(`ระบบบันทึกการออกจากหน้าจอสอบ ${sub.sw} ครั้ง ควรตั้งใจทำข้อสอบโดยไม่สลับหน้าจอ`);
+  if(clsAvg!=null) adv.push(g.p>=clsAvg?`คะแนนสูงกว่าค่าเฉลี่ยของผู้เข้าสอบ (${clsAvg}%)`:`คะแนนต่ำกว่าค่าเฉลี่ยของผู้เข้าสอบ (${clsAvg}%)`);
+  return {T,strong,weak,mid,adv};
+}
+function anaHTML(ex, key, sub, g, extra={}){
+  const [lvT,,lvC]=levelOf(g.p); const A=adviceFor(g,sub,extra.avg);
+  const dur = sub.startMs&&sub.endMs ? Math.max(1,Math.round((sub.endMs-sub.startMs)/60000))+' นาที' : '-';
+  const wrong=g.per.filter(p=>!p.ok);
+  return `<div id="anaBox">
+    <div class="ahead"><img src="${LOGO}" crossorigin="anonymous"><div class="grow"><h3 style="margin:0">${esc(sub.name)}</h3>
+      <div class="muted sm">ชั้น ${esc(sub.cls||'-')} เลขที่ ${esc(sub.no||'-')} · ${esc(ex.title)} · ${esc(ex.subj)} ภาคเรียน ${esc(ex.term)}</div></div>
+      <div class="ring" style="background:conic-gradient(${lvC} ${g.p*3.6}deg,#f3f4f6 0)"><div><b>${g.score}/${g.n}</b><span class="sm muted">${g.p}%</span></div></div></div>
+    <div class="grid g4" style="margin-bottom:14px">
+      <div class="stat"><div class="v" style="color:${lvC}">${lvT}</div><div class="l">ระดับผลการสอบ</div></div>
+      <div class="stat"><div class="v">${extra.rank?extra.rank+'/'+extra.total:'-'}</div><div class="l">ลำดับที่ในกลุ่ม</div></div>
+      <div class="stat"><div class="v">${extra.avg!=null?extra.avg+'%':'-'}</div><div class="l">ค่าเฉลี่ยกลุ่ม</div></div>
+      <div class="stat"><div class="v">${dur}</div><div class="l">เวลาที่ใช้ · สลับแท็บ ${sub.sw||0} ครั้ง</div></div>
+    </div>
+    <div class="grid g2">
+      <div><h4>📈 ผลรายหัวข้อ</h4>${A.T.map(t=>`<div class="bar"><div class="t"><span>${esc(t.k)}</span><b>${t.c}/${t.n} (${t.p}%)</b></div><div class="b"><i style="width:${t.p}%;background:${barColor(t.p)}"></i></div></div>`).join('')}
+        <h4 style="margin-top:14px">🧠 ผลตามระดับการคิด</h4>${Object.entries(g.lvls).map(([k,v])=>{const p=pct(v.c,v.n);return `<div class="bar"><div class="t"><span>${esc(k)}</span><b>${v.c}/${v.n}</b></div><div class="b"><i style="width:${p}%;background:${barColor(p)}"></i></div></div>`}).join('')}</div>
+      <div>
+        <div class="box s"><h4>💪 จุดแข็ง</h4><ul>${A.strong.length?A.strong.map(t=>`<li>${esc(t.k)} (${t.p}%)</li>`).join(''):'<li>ยังไม่มีหัวข้อที่ได้ ≥ 75%</li>'}</ul></div>
+        <div class="box w"><h4>🎯 จุดที่ควรพัฒนา</h4><ul>${A.weak.length?A.weak.map(t=>`<li>${esc(t.k)} (${t.p}%)</li>`).join(''):'<li>ไม่มีหัวข้อที่ต่ำกว่า 50% 👍</li>'}</ul></div>
+        <div class="box r"><h4>💡 คำแนะนำ</h4><ul>${A.adv.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>
+      </div>
+    </div>
+    ${wrong.length&&!extra.hideWrong?`<h4 style="margin-top:10px">❌ ข้อที่ตอบผิด/ไม่ได้ตอบ (${wrong.length} ข้อ)</h4>${wrong.map(p=>`<div class="wrongq"><b>ข้อ ${p.i+1}</b> ${esc(p.q.q)}<br>
+      <span style="color:var(--no)">ตอบ: ${p.answered?esc(p.q.o[p.pick]):'— ไม่ได้ตอบ —'}</span> · <span style="color:var(--ok)">เฉลย: ${esc(p.q.o[key.key[p.i]])}</span>${key.exp[p.i]?`<br><span class="muted">💬 ${esc(key.exp[p.i])}</span>`:''}</div>`).join('')}`:''}
+    <p class="center muted sm" style="margin:14px 0 0">ระบบคลังข้อสอบวิชาภาษาไทย · พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง · ${new Date().toLocaleDateString('th-TH',{dateStyle:'long'})}</p>
+  </div>`;
+}
+function anaText(ex, sub, g, extra={}){
+  const [lvT]=levelOf(g.p); const A=adviceFor(g,sub,extra.avg);
+  return `📊 ผลการวิเคราะห์ผู้เรียน
+👤 ${sub.name}  ชั้น ${sub.cls||'-'} เลขที่ ${sub.no||'-'}
+📘 ${ex.title} (${ex.subj})
+━━━━━━━━━━━━━━
+🏆 คะแนน ${g.score}/${g.n} (${g.p}%) ระดับ “${lvT}”${extra.rank?`\n📍 ลำดับที่ ${extra.rank} จาก ${extra.total} คน · ค่าเฉลี่ยกลุ่ม ${extra.avg}%`:''}
+
+📈 ผลรายหัวข้อ
+${A.T.map(t=>`${t.p>=75?'🟢':t.p>=50?'🟡':'🔴'} ${t.k} ${t.c}/${t.n} (${t.p}%)`).join('\n')}
+
+💪 จุดแข็ง: ${A.strong.map(t=>t.k).join(', ')||'-'}
+🎯 ควรพัฒนา: ${A.weak.map(t=>t.k).join(', ')||'-'}
+
+💡 คำแนะนำ
+${A.adv.map((a,i)=>`${i+1}. ${a}`).join('\n')}
+
+ครูนนทพัทธ์ หิรัญเรือง`;
+}
+async function saveImage(el, name){
+  try{ toast('กำลังสร้างภาพ...'); const c=await html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    const a=document.createElement('a'); a.href=c.toDataURL('image/png'); a.download=name+'.png'; a.click(); }
+  catch(e){ console.error(e); toast('สร้างภาพไม่สำเร็จ'); }
+}
+
+/* =======================================================================
+   ANALYSIS (teacher)
+   ======================================================================= */
+let AN={ex:null,key:null,subs:[],rows:[]};
+async function anaInit(pick){
+  if(!EXAMS.length) await loadExams();
+  $('#aExam').innerHTML='<option value="">— เลือกชุดข้อสอบ —</option>'+EXAMS.map(x=>`<option value="${x.id}">${esc(x.title)} · ${esc(x.subj)}</option>`).join('');
+  if(pick){ $('#aExam').value=pick; anaLoad(); }
+}
+$('#aExam').onchange=anaLoad; $('#aLoad').onclick=anaLoad; $('#aSearch').oninput=anaTable;
+async function anaLoad(){
+  const id=$('#aExam').value; if(!id){ $('#aClass').classList.add('hide'); return; }
+  const ex=EXAMS.find(x=>x.id===id);
+  try{ const [k,s]=await Promise.all([getDoc(doc(db,'exams',id,'private','key')),getDocs(collection(db,'exams',id,'subs'))]);
+    AN={ex,key:k.data(),subs:s.docs.map(d=>({id:d.id,...d.data()}))}; }catch(e){ return toast('โหลดผลไม่สำเร็จ'); }
+  AN.rows=AN.subs.map(s=>({s,g:gradeSub(ex,AN.key,s)})).sort((a,b)=>b.g.score-a.g.score);
+  const done=AN.rows.filter(r=>r.s.status==='done'); const ps=done.map(r=>r.g.p);
+  AN.avg = ps.length?Math.round(ps.reduce((a,b)=>a+b,0)/ps.length*10)/10:0;
+  done.forEach((r,i)=>r.rank=i+1);
+  const sorted=[...ps].sort((a,b)=>a-b); const med=sorted.length?sorted[Math.floor(sorted.length/2)]:0;
+  $('#aClass').classList.remove('hide');
+  $('#aKpi').innerHTML=[['ผู้เข้าสอบ',AN.rows.length+' คน'],['ส่งแล้ว',done.length+' คน'],['ค่าเฉลี่ย',AN.avg+'%'],['มัธยฐาน',med+'%'],['สูงสุด',(ps.length?Math.max(...ps):0)+'%'],['ต่ำสุด',(ps.length?Math.min(...ps):0)+'%'],['ผ่านเกณฑ์ 50%',done.filter(r=>r.g.p>=50).length+' คน'],['มีการสลับแท็บ',AN.rows.filter(r=>(r.s.sw||0)>0).length+' คน']]
+    .map(([l,v])=>`<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+  const bins=[0,0,0,0,0]; ps.forEach(p=>bins[Math.min(4,Math.floor(p/20))]++); const mx=Math.max(1,...bins);
+  $('#aHist').innerHTML=bins.map(b=>`<div style="height:${b/mx*100}%"><span>${b}</span></div>`).join('');
+  $('#aHistL').innerHTML=['0-19','20-39','40-59','60-79','80-100'].map(x=>`<div>${x}</div>`).join('');
+  const tp={}; done.forEach(r=>Object.entries(r.g.topics).forEach(([k,v])=>{ tp[k]=tp[k]||{n:0,c:0}; tp[k].n+=v.n; tp[k].c+=v.c; }));
+  $('#aTopicCls').innerHTML=Object.entries(tp).map(([k,v])=>{const p=pct(v.c,v.n);return `<div class="bar"><div class="t"><span>${esc(k)}</span><b>${p}%</b></div><div class="b"><i style="width:${p}%;background:${barColor(p)}"></i></div></div>`}).join('')||'<span class="muted">ยังไม่มีผู้ส่ง</span>';
+  const qc=ex.qs.map((q,i)=>({i,q,w:done.filter(r=>!r.g.per[i].ok).length})).sort((a,b)=>b.w-a.w).slice(0,5);
+  $('#aHard').innerHTML=done.length?qc.map(x=>`<div class="wrongq"><b>ข้อ ${x.i+1}</b> ${esc(x.q.q)} <span class="badge no">ผิด ${x.w}/${done.length} คน</span> <span class="badge">${esc(x.q.tp)}</span><br><span class="muted sm">เฉลย: ${esc(x.q.o[AN.key.key[x.i]])}</span></div>`).join(''):'<span class="muted">ยังไม่มีผู้ส่ง</span>';
+  anaTable();
+}
+function anaTable(){
+  const q=$('#aSearch').value.trim();
+  $('#aBody').innerHTML=AN.rows.filter(r=>!q||(r.s.name+' '+r.s.cls).includes(q)).map((r,i)=>`<tr>
+    <td>${r.rank||'-'}</td><td>${esc(r.s.name)}</td><td>${esc(r.s.cls)} / ${esc(r.s.no)}</td>
+    <td><b>${r.g.score}/${r.g.n}</b> <span class="badge ${levelOf(r.g.p)[1]}">${r.g.p}%</span></td>
+    <td>${r.s.sw?`<span class="badge no">${r.s.sw}</span>`:'0'}</td>
+    <td>${r.s.status==='done'?(r.s.auto?'<span class="badge no">ส่งอัตโนมัติ</span>':'<span class="badge ok">ส่งแล้ว</span>'):'<span class="badge wa">กำลังทำ</span>'}</td>
+    <td style="white-space:nowrap"><button class="btn pri xs" data-sa="${r.s.id}">📊 วิเคราะห์</button> <button class="btn dan xs" data-rs="${r.s.id}" title="ลบผลให้สอบใหม่">↺</button></td></tr>`).join('')||'<tr><td colspan="7" class="muted center">ยังไม่มีผู้เข้าสอบ</td></tr>';
+  $$('[data-sa]').forEach(b=>b.onclick=()=>openStuAna(b.dataset.sa));
+  $$('[data-rs]').forEach(b=>b.onclick=async()=>{ if(!await confirmBox('ลบผลของนักเรียนคนนี้ให้สอบใหม่ได้?')) return; await deleteDoc(doc(db,'exams',AN.ex.id,'subs',b.dataset.rs)); toast('ลบผลแล้ว'); anaLoad(); });
+}
+let CUR_ANA=null;
+function openStuAna(id){
+  const r=AN.rows.find(x=>x.s.id===id); const extra={rank:r.rank,total:AN.rows.filter(x=>x.s.status==='done').length,avg:AN.avg};
+  $('#anaWrap').innerHTML=anaHTML(AN.ex,AN.key,r.s,r.g,extra); CUR_ANA={r,extra}; openM('mAna');
+}
+$('#anImg').onclick=()=>saveImage($('#anaBox'),'วิเคราะห์-'+CUR_ANA.r.s.name);
+$('#anTxt').onclick=()=>textModal('📋 ข้อความแจ้งผู้เรียน',anaText(AN.ex,CUR_ANA.r.s,CUR_ANA.r.g,CUR_ANA.extra));
+$('#aCsv').onclick=()=>{ if(!AN.rows?.length) return toast('ยังไม่มีข้อมูล');
+  const tps=Object.keys(AN.rows[0].g.topics);
+  const rows=[['ลำดับ','ชื่อ-สกุล','ชั้น','เลขที่','คะแนน','เต็ม','ร้อยละ','ระดับ','สลับแท็บ','สถานะ',...tps.map(t=>'หัวข้อ:'+t)].join(',')]
+    .concat(AN.rows.map(r=>[r.rank||'',r.s.name,r.s.cls,r.s.no,r.g.score,r.g.n,r.g.p,levelOf(r.g.p)[0],r.s.sw||0,r.s.status,...tps.map(t=>r.g.topics[t]?pct(r.g.topics[t].c,r.g.topics[t].n):'')].map(csvCell).join(',')));
+  download('ผลสอบ-'+AN.ex.title+'.csv',rows.join('\n'),'text/csv'); };
+
+/* =======================================================================
+   STUDENT
+   ======================================================================= */
+let EX=null, TK=null, TIMER=null;
+async function studentInit(eid){
+  showView('vStu');
+  try{ const s=await getDoc(doc(db,'exams',eid)); if(!s.exists()) throw 0; EX={id:eid,...s.data()}; }
+  catch(e){ $('#sTitle').textContent='ไม่พบแบบทดสอบ'; $('#sForm').classList.add('hide'); $('#sMeta').textContent='ลิงก์ไม่ถูกต้องหรือถูกลบแล้ว'; return; }
+  document.title=EX.title+' · ระบบคลังข้อสอบ';
+  $('#sTitle').textContent=EX.title; $('#sMeta').innerHTML=`${esc(EX.subj)} · ${EX.n} ข้อ · ${EX.timeMin?EX.timeMin+' นาที':'ไม่จำกัดเวลา'}`;
+  if(EX.note){ $('#sNote').classList.remove('hide'); $('#sNote').textContent='📌 '+EX.note; }
+  let mine=null; try{ const m=await getDoc(doc(db,'exams',eid,'subs',UID)); if(m.exists()) mine=m.data(); }catch(e){}
+  if(mine&&mine.status==='done') return showDone(mine);
+  if(mine&&mine.status==='doing'){ $('#stName').value=mine.name; $('#stCls').value=mine.cls; $('#stNo').value=mine.no; $('#stGo').textContent='ทำข้อสอบต่อ'; TK={resume:mine}; }
+  if(!EX.open&&!mine){ $('#sForm').classList.add('hide'); $('#sClosed').textContent='⛔ แบบทดสอบนี้ปิดรับคำตอบแล้ว'; }
+  try{ const L=JSON.parse(localStorage.getItem('stu_info')||'null'); if(L&&!mine){ $('#stName').value=L.name; $('#stCls').value=L.cls; $('#stNo').value=L.no; } }catch(e){}
+}
+$('#stGo').onclick=()=>{
+  const name=$('#stName').value.trim(), cls=$('#stCls').value.trim(), no=$('#stNo').value.trim();
+  if(name.length<3||!cls||!no) return toast('กรอกชื่อ-สกุล ชั้น และเลขที่ให้ครบ');
+  try{ localStorage.setItem('stu_info',JSON.stringify({name,cls,no})); }catch(e){}
+  if(TK&&TK.resume) return startExam({name,cls,no});
+  if(EX.consent===false) return startExam({name,cls,no});
+  $('#cOk').checked=false; $('#cGo').disabled=true; openM('mConsent');
+  $('#cGo').onclick=()=>{ closeM('mConsent'); startExam({name,cls,no}); };
+};
+$('#cOk').onchange=e=>$('#cGo').disabled=!e.target.checked;
+$('#cNo').onclick=()=>closeM('mConsent');
+
+async function startExam(info){
+  const n=EX.qs.length;
+  if(TK&&TK.resume){ const r=TK.resume; TK={order:r.order,co:r.co||{},ans:r.ans||{},sw:r.sw||0,idx:r.cur||0,startMs:r.startMs,info:{name:r.name,cls:r.cls,no:r.no}}; }
+  else {
+    const order=EX.shufQ?shuffle([...Array(n).keys()]):[...Array(n).keys()];
+    const co={}; EX.qs.forEach((q,i)=>{ const k=[...q.o.keys()]; co[i]= (EX.shufO&&q.t!=='tf')?shuffle(k):k; });
+    TK={order,co,ans:{},sw:0,idx:0,startMs:Date.now(),info};
+    try{ await setDoc(doc(db,'exams',EX.id,'subs',UID),{uid:UID,name:info.name,cls:info.cls,no:info.no,status:'doing',order,co,ans:{},sw:0,cur:0,startMs:TK.startMs,startAt:serverTimestamp()}); }
+    catch(e){ console.error(e); return toast(/permission/i.test(e.code)?'แบบทดสอบปิดรับแล้ว':'เริ่มสอบไม่สำเร็จ ลองใหม่'); }
+  }
+  $('#sIntro').classList.add('hide'); $('#sExam').classList.remove('hide'); $('#sxTitle').textContent=EX.title;
+  renderQ(); startTimer(); armCheat();
+}
+function renderQ(){
+  const k=TK.idx, qi=TK.order[k], q=EX.qs[qi];
+  $('#sxNum').textContent=`ข้อที่ ${k+1} / ${EX.qs.length}`; $('#sxTopic').textContent=q.tp||'';
+  $('#sxQ').textContent=q.q;
+  $('#sxOpts').innerHTML=TK.co[qi].map((oi,j)=>`<button class="opt ${TK.ans[qi]===oi?'sel':''}" data-o="${oi}"><span class="k">${q.t==='tf'?(oi===0?'✓':'✗'):thNum[j]}</span><span>${esc(q.o[oi])}</span></button>`).join('');
+  $$('#sxOpts .opt').forEach(b=>b.onclick=()=>{ TK.ans[qi]=+b.dataset.o; saveProg(); renderQ(); });
+  $('#sxPrev').disabled=k===0; $('#sxNext').disabled=k===EX.qs.length-1;
+  const done=Object.keys(TK.ans).length; $('#sxBar').style.width=pct(done,EX.qs.length)+'%';
+  $('#sxNav').innerHTML=TK.order.map((qi2,j)=>`<button class="${TK.ans[qi2]!==undefined?'ans':''} ${j===k?'cur':''}" data-j="${j}">${j+1}</button>`).join('');
+  $$('#sxNav button').forEach(b=>b.onclick=()=>{ TK.idx=+b.dataset.j; renderQ(); });
+}
+$('#sxPrev').onclick=()=>{ if(TK.idx>0){ TK.idx--; renderQ(); } };
+$('#sxNext').onclick=()=>{ if(TK.idx<EX.qs.length-1){ TK.idx++; renderQ(); } };
+let saveH=null;
+function saveProg(extra){ clearTimeout(saveH); const run=()=>updateDoc(doc(db,'exams',EX.id,'subs',UID),{ans:TK.ans,cur:TK.idx,sw:TK.sw,...(extra||{})}).catch(e=>console.warn(e));
+  if(extra) return run(); saveH=setTimeout(run,800); }
+function startTimer(){
+  if(!EX.timeMin){ $('#sxTimer').textContent='∞'; return; }
+  const end=TK.startMs+EX.timeMin*60000;
+  const tick=()=>{ const s=Math.max(0,Math.round((end-Date.now())/1000)); $('#sxTimer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+    $('#sxTimer').classList.toggle('low',s<=60); if(s<=0){ clearInterval(TIMER); submit(true,'หมดเวลา'); } };
+  tick(); TIMER=setInterval(tick,1000);
+}
+let cheatOn=false, lastSw=0;
+function armCheat(){
+  cheatOn=true;
+  const hit=()=>{ if(!cheatOn) return; const now=Date.now(); if(now-lastSw<1500) return; lastSw=now;
+    TK.sw++; saveProg({sw:TK.sw});
+    if(EX.maxSw>0 && TK.sw>EX.maxSw){ submit(true,'ออกจากหน้าข้อสอบเกินกำหนด'); return; }
+    $('#wMsg').innerHTML=`ระบบบันทึกการออกจากหน้าจอครั้งที่ <b>${TK.sw}</b>${EX.maxSw?` จากที่อนุญาต ${EX.maxSw} ครั้ง<br>หากเกินกำหนด ระบบจะส่งคำตอบอัตโนมัติ`:''}<br>ข้อมูลนี้ถูกส่งให้ครูผู้สอนแล้ว`; openM('mWarn'); };
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) hit(); });
+  window.addEventListener('blur',hit);
+  window.addEventListener('beforeunload',e=>{ if(cheatOn){ e.preventDefault(); e.returnValue=''; } });
+  document.addEventListener('contextmenu',e=>{ if(cheatOn) e.preventDefault(); });
+  document.addEventListener('copy',e=>{ if(cheatOn) e.preventDefault(); });
+}
+$('#sxSubmit').onclick=async()=>{ const left=EX.qs.length-Object.keys(TK.ans).length;
+  if(!await confirmBox(left?`ยังไม่ได้ตอบ ${left} ข้อ ยืนยันส่งคำตอบ?`:'ยืนยันส่งคำตอบ?')) return; submit(false); };
+let submitting=false;
+async function submit(auto, reason){
+  if(submitting) return; submitting=true; cheatOn=false; clearInterval(TIMER); closeM('mWarn');
+  const endMs=Date.now();
+  try{ await updateDoc(doc(db,'exams',EX.id,'subs',UID),{ans:TK.ans,sw:TK.sw,status:'done',auto:!!auto,reason:reason||'',endMs,endAt:serverTimestamp()}); }
+  catch(e){ console.error(e); submitting=false; cheatOn=true; return toast('ส่งไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่'); }
+  showDone({...TK.info,ans:TK.ans,sw:TK.sw,status:'done',auto,reason,startMs:TK.startMs,endMs});
+}
+async function showDone(sub){
+  $('#sIntro').classList.add('hide'); $('#sExam').classList.add('hide'); $('#sDone').classList.remove('hide');
+  $('#sDoneMsg').innerHTML=`<div style="font-size:3rem">${sub.auto?'⚠️':'🎉'}</div><h2>${sub.auto?'ระบบส่งคำตอบอัตโนมัติ':'ส่งคำตอบเรียบร้อย'}</h2>
+    <p class="muted">${esc(sub.name)} · ${esc(EX.title)}${sub.reason?'<br>เหตุผล: '+esc(sub.reason):''}</p>`;
+  if(!EX.showScore){ $('#sDoneMsg').insertAdjacentHTML('beforeend','<p>ครูจะแจ้งผลคะแนนภายหลัง</p>'); return; }
+  try{ const k=await getDoc(doc(db,'exams',EX.id,'private','key')); const key=k.data(); const g=gradeSub(EX,key,sub);
+    $('#sDoneAna').innerHTML=`<div class="card">${anaHTML(EX,key,sub,g,{})}<div class="row" style="margin-top:12px"><button class="btn pri grow" id="stImg">🖼 บันทึกผลเป็นภาพ</button><button class="btn gho grow" id="stTxt">📋 คัดลอกผล</button></div></div>`;
+    $('#stImg').onclick=()=>saveImage($('#anaBox'),'ผลสอบ-'+sub.name);
+    $('#stTxt').onclick=()=>copyText(anaText(EX,sub,g,{}));
+  }catch(e){ console.warn(e); $('#sDoneMsg').insertAdjacentHTML('beforeend','<p>ครูจะแจ้งผลคะแนนภายหลัง</p>'); }
+}
+</script>
+</body>
+</html>
