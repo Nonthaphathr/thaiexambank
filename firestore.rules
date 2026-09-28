@@ -60,6 +60,7 @@ service cloud.firestore {
       match /subs/{uid} {
         allow get: if isAdmin() || (signedIn() && request.auth.uid == uid);
         allow list, delete: if isAdmin();
+        allow create, update: if isAdmin();   // ครูบันทึกคะแนนจากกระดาษคำตอบ (สแกน)
         allow create: if signedIn() && request.auth.uid == uid
           && request.resource.data.status == 'doing'
           && get(/databases/$(database)/documents/exams/$(eid)).data.open == true;
