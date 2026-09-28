@@ -533,7 +533,7 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
   <div id="ppMenu">
     <div class="grid g2">
       <div class="card" style="margin:0"><h3>1) พิมพ์</h3><p class="muted sm">สำหรับนักเรียนที่ไม่มีมือถือ — ข้อสอบกระดาษเรียงลำดับข้อ/ตัวเลือกตามต้นฉบับ (ไม่สลับ)</p>
-        <div class="row"><button class="btn gho grow" id="ppBook">🖨 พิมพ์ข้อสอบ</button><button class="btn pri grow" id="ppSheet">🖨 พิมพ์กระดาษคำตอบ</button></div>
+        <div class="row"><button class="btn gho grow" id="ppBook">📄 ข้อสอบ .docx</button><button class="btn pri grow" id="ppSheet">🖨 พิมพ์กระดาษคำตอบ</button></div>
         <label class="chk sm" style="margin-top:8px">จำนวนแผ่นกระดาษคำตอบ <input type="number" id="ppCopies" value="1" min="1" max="60" style="width:80px"></label></div>
       <div class="card" style="margin:0"><h3>2) สแกนตรวจ</h3><p class="muted sm">เปิดกล้องมือถือ ถ่ายให้เห็น <b>สี่เหลี่ยมดำครบ 4 มุม</b> วางกระดาษบนพื้นเรียบ แสงสว่างพอ</p>
         <div class="field"><label>ชั้น (ใช้กับทุกแผ่นที่สแกน)</label><input id="ppCls" placeholder="ม..."></div>
@@ -1032,9 +1032,9 @@ function lvRender(){
    ======================================================================= */
 const OMR={ fid:[[14,14],[196,14],[14,283],[196,283]], rowsPerCol:25, maxQ:100 };
 function omrLayout(n){
-  const q=[]; for(let i=0;i<Math.min(n,OMR.maxQ);i++){ const c=Math.floor(i/OMR.rowsPerCol), r=i%OMR.rowsPerCol, x0=24+c*45, y=84+r*7.6;
+  const q=[]; for(let i=0;i<Math.min(n,OMR.maxQ);i++){ const c=Math.floor(i/OMR.rowsPerCol), r=i%OMR.rowsPerCol, x0=24+c*45, y=87+r*7.4;
     q.push({i,x0,y,b:[0,1,2,3].map(j=>[x0+11+j*7.5,y])}); }
-  const num=[0,1].map(row=>[...Array(10).keys()].map(d=>[110+d*7.5,52+row*8]));
+  const num=[0,1].map(row=>[...Array(10).keys()].map(d=>[122+d*6.7,54+row*8]));
   return {q,num};
 }
 let PP={ex:null,key:null,stream:null,raf:null,last:null};
@@ -1050,7 +1050,7 @@ function printHTML(title, body){
   w.document.write(`<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><title>${esc(title)}</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
   <style>@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Sarabun,sans-serif;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .pg{position:relative;width:210mm;height:297mm;page-break-after:always;overflow:hidden}.a{position:absolute}
+  html,body{margin:0;padding:0}.pg{position:relative;width:210mm;height:296.5mm;overflow:hidden;break-after:page;page-break-after:always}.pg:last-of-type{break-after:auto;page-break-after:auto}.a{position:absolute}
   .f{position:absolute;width:12mm;height:12mm;background:#000}.bb{position:absolute;width:5mm;height:5mm;border:.35mm solid #222;border-radius:50%;transform:translate(-50%,-50%)}
   .t{position:absolute;transform:translate(-50%,-50%);font-size:9pt}.book{padding:15mm 18mm;font-size:14pt;line-height:1.5}.book .q{break-inside:avoid;margin-bottom:3mm}</style></head><body>${body}
   <script>document.fonts.ready.then(()=>setTimeout(()=>print(),300))<\/script></body></html>`); w.document.close();
@@ -1058,28 +1058,63 @@ function printHTML(title, body){
 function sheetPage(ex){
   const L=omrLayout(ex.qs.length); let h='<div class="pg">';
   OMR.fid.forEach(([x,y])=>h+=`<div class="f" style="left:${x-6}mm;top:${y-6}mm"></div>`);
-  h+=`<img class="a" src="${LOGO}" style="left:24mm;top:22mm;width:14mm;height:14mm">
-    <div class="a" style="left:41mm;top:22mm;font-size:15pt;font-weight:700">กระดาษคำตอบ</div>
-    <div class="a" style="left:41mm;top:29mm;font-size:11pt;width:140mm;white-space:nowrap;overflow:hidden">${esc(ex.title)} · ${esc(ex.subj)}</div>
-    <div class="a" style="left:24mm;top:42mm;font-size:12pt">ชื่อ-สกุล ..................................................</div>
-    <div class="a" style="left:24mm;top:52mm;font-size:12pt">ชั้น ................</div>
-    <div class="a" style="left:24mm;top:62mm;font-size:9.5pt;width:60mm;line-height:1.3">ใช้ดินสอ 2B ฝนให้เต็มวง · ไม่พับ/ไม่ขีดเขียนบริเวณสี่เหลี่ยมดำ · ถูก/ผิด: ก = ถูก, ข = ผิด</div>
-    <div class="a" style="left:88mm;top:40mm;font-size:10pt;font-weight:700">ฝนเลขที่</div>
-    <div class="t" style="left:96mm;top:52mm">หลักสิบ</div><div class="t" style="left:96mm;top:60mm">หลักหน่วย</div>`;
-  [...Array(10).keys()].forEach(d=>h+=`<div class="t" style="left:${110+d*7.5}mm;top:46mm;font-weight:700">${d}</div>`);
+  h+=`<img class="a" src="${LOGO}" style="left:22mm;top:21mm;width:13mm;height:13mm;object-fit:contain">
+    <div class="a" style="left:38mm;top:20mm;font-size:17pt;font-weight:700;line-height:1.2">กระดาษคำตอบ</div>
+    <div class="a" style="left:38mm;top:28.5mm;width:150mm;font-size:11pt;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(ex.title)} · ${esc(ex.subj)}${ex.term?' · ภาคเรียนที่ '+esc(ex.term):''}</div>
+    <div class="a" style="left:22mm;top:37mm;width:166mm;height:36mm;border:.35mm solid #444;border-radius:2.5mm"></div>
+    <div class="a" style="left:104mm;top:37mm;width:0;height:36mm;border-left:.3mm solid #999"></div>
+    <div class="a" style="left:25mm;top:40mm;width:77mm;font-size:12pt;line-height:1.2;white-space:nowrap">ชื่อ-สกุล ...............................................</div>
+    <div class="a" style="left:25mm;top:48.5mm;width:77mm;font-size:12pt;line-height:1.2;white-space:nowrap">ชั้น ม. ........ / ........ &nbsp; เลขที่ ..........</div>
+    <div class="a" style="left:25mm;top:57mm;width:77mm;font-size:9.5pt;line-height:1.35;color:#333">• ใช้ดินสอ 2B ฝนให้เต็มวง ลบให้สะอาด<br>• ข้อถูก/ผิด ฝน ก = ถูก , ข = ผิด<br>• ห้ามพับ/ขีดเขียนบริเวณสี่เหลี่ยมดำ</div>
+    <div class="a" style="left:107mm;top:39.5mm;font-size:10.5pt;font-weight:700;line-height:1.2">ฝนเลขที่</div>
+    <div class="a" style="left:107mm;top:51.8mm;font-size:10pt;line-height:1.2">สิบ</div>
+    <div class="a" style="left:107mm;top:59.8mm;font-size:10pt;line-height:1.2">หน่วย</div>
+    <div class="a" style="left:107mm;top:66.5mm;font-size:8pt;color:#555;line-height:1.2">เช่น เลขที่ 7 ฝน สิบ = 0 , หน่วย = 7</div>`;
+  [...Array(10).keys()].forEach(d=>h+=`<div class="t" style="left:${122+d*6.7}mm;top:47.5mm;font-weight:700">${d}</div>`);
   L.num.flat().forEach(([x,y])=>h+=`<div class="bb" style="left:${x}mm;top:${y}mm"></div>`);
   const cols=Math.ceil(L.q.length/OMR.rowsPerCol);
-  for(let c=0;c<cols;c++) ['ก','ข','ค','ง'].forEach((k,j)=>h+=`<div class="t" style="left:${24+c*45+11+j*7.5}mm;top:78mm;font-weight:700">${k}</div>`);
+  for(let c=0;c<cols;c++) ['ก','ข','ค','ง'].forEach((k,j)=>h+=`<div class="t" style="left:${24+c*45+11+j*7.5}mm;top:80.5mm;font-weight:700">${k}</div>`);
   L.q.forEach(q=>{ const tf=ex.qs[q.i].t==='tf';
     h+=`<div class="t" style="left:${q.x0+3}mm;top:${q.y}mm;font-weight:700;font-size:10pt">${q.i+1}</div>`;
     q.b.forEach(([x,y],j)=>{ if(!tf||j<2) h+=`<div class="bb" style="left:${x}mm;top:${y}mm"></div>`; }); });
   return h+'</div>';
 }
 $('#ppSheet').onclick=()=>{ const n=Math.max(1,Math.min(60,+$('#ppCopies').value||1)); const p=sheetPage(PP.ex); printHTML('กระดาษคำตอบ-'+PP.ex.title,p.repeat(n)); };
-$('#ppBook').onclick=()=>{ const ex=PP.ex;
-  printHTML('ข้อสอบ-'+ex.title,`<div class="book"><div style="text-align:center"><b style="font-size:18pt">${esc(ex.title)}</b><br>${esc(ex.subj)} ภาคเรียนที่ ${esc(ex.term)} · ${ex.n} ข้อ${ex.timeMin?' · เวลา '+ex.timeMin+' นาที':''}</div>
-  <p><b>คำชี้แจง</b> เลือกคำตอบที่ถูกที่สุดเพียงข้อเดียว แล้วฝนลงในกระดาษคำตอบ${ex.note?' · '+esc(ex.note):''}</p>`+
-  ex.qs.map((q,i)=>`<div class="q"><b>${i+1}.</b> ${esc(q.q)}<div style="padding-left:8mm">${q.t==='tf'?'ก. ถูก &nbsp;&nbsp; ข. ผิด':q.o.map((o,j)=>`${thNum[j]}. ${esc(o)}`).join('<br>')}</div></div>`).join('')+'</div>'); };
+/* ข้อสอบฉบับพิมพ์ (.docx) — TH SarabunPSK 16, หัวกระดาษ/เลขหน้า, ข้อ+ตัวเลือกไม่ขาดข้ามหน้า */
+function bookDocx(ex){
+  const {Paragraph,Header,Footer,AlignmentType,PageNumber,Table,TableRow,TableCell,WidthType,BorderStyle,TabStopType}=DX();
+  const C={alignment:AlignmentType.CENTER}, L=AlignmentType.LEFT, keep={keepNext:true,keepLines:true};
+  const nb={style:BorderStyle.NONE,size:0,color:'FFFFFF'}, box={style:BorderStyle.SINGLE,size:6,color:'555555'};
+  const info=new Table({ width:{size:100,type:WidthType.PERCENTAGE}, borders:{top:box,bottom:box,left:box,right:box,insideHorizontal:nb,insideVertical:nb},
+    rows:[ new TableRow({children:[ new TableCell({width:{size:62,type:WidthType.PERCENTAGE},margins:{top:80,bottom:40,left:120},children:[dP('ชื่อ-สกุล ..................................................',{alignment:L})]}),
+                                   new TableCell({width:{size:38,type:WidthType.PERCENTAGE},margins:{top:80,bottom:40},children:[dP('ชั้น ม. ...../..... เลขที่ .......',{alignment:L})]}) ]}),
+           new TableRow({children:[ new TableCell({columnSpan:2,margins:{top:0,bottom:80,left:120},children:[dP(`จำนวน ${ex.qs.length} ข้อ${ex.timeMin?'   เวลา '+ex.timeMin+' นาที':''}   คะแนนเต็ม ${ex.qs.length} คะแนน`,{alignment:L})]}) ]}) ]});
+  const ch=[
+    dP(/^แบบทดสอบ/.test(ex.title||'')?ex.title:'แบบทดสอบ '+(ex.title||''),{...C,run:{bold:true,size:40}}),
+    dP(`วิชา ${ex.subj||'-'}${ex.term?'  ภาคเรียนที่ '+ex.term:''}`,{...C,run:{bold:true,size:34}}),
+    dP('โรงเรียนกระดุมทองวิทยา',{...C,spacing:{after:160}}),
+    info,
+    new Paragraph({spacing:{before:160},alignment:L,children:[dT('คำชี้แจง',{bold:true}),dT('  ให้นักเรียนเลือกคำตอบที่ถูกต้องที่สุดเพียงคำตอบเดียว แล้วฝนคำตอบลงในกระดาษคำตอบให้เต็มวง ข้อ ถูก/ผิด ให้ฝน ก = ถูก , ข = ผิด')]}),
+    ...(ex.note?[dP(ex.note,{alignment:L,indent:{left:720}})]:[]),
+    new Paragraph({spacing:{after:120},border:{bottom:{style:BorderStyle.SINGLE,size:6,color:'999999',space:4}},children:[]})
+  ];
+  ex.qs.forEach((q,i)=>{
+    const opts=q.t==='tf'?['ถูก','ผิด']:q.o;
+    ch.push(new Paragraph({...keep,alignment:L,spacing:{before:i?140:0},indent:{left:454,hanging:454},children:[dT(`${i+1}.`,{bold:true}),dTab(q.q)],tabStops:[{type:TabStopType.LEFT,position:454}]}));
+    const short=opts.every(o=>String(o).length<=22);
+    if(short && opts.length===4){ // 2 คอลัมน์
+      [[0,1],[2,3]].forEach((pr,k)=>ch.push(new Paragraph({keepNext:k===0,keepLines:true,alignment:L,indent:{left:454},tabStops:[{type:TabStopType.LEFT,position:454+4200}],
+        children:[dT(`${thNum[pr[0]]}. ${opts[pr[0]]}`),dTab(`${thNum[pr[1]]}. ${opts[pr[1]]}`)]})));
+    } else if(q.t==='tf'){
+      ch.push(new Paragraph({keepLines:true,alignment:L,indent:{left:454},tabStops:[{type:TabStopType.LEFT,position:454+4200}],children:[dT('ก. ถูก'),dTab('ข. ผิด')]}));
+    } else opts.forEach((o,j)=>ch.push(dP(`${thNum[j]}. ${o}`,{keepNext:j<opts.length-1,keepLines:true,alignment:L,indent:{left:794,hanging:340}})));
+  });
+  ch.push(dP('— หมดข้อสอบ —',{...C,spacing:{before:300},run:{bold:true}}));
+  const headers={default:new Header({children:[dP(`${ex.title||''} · ${ex.subj||''}`,{alignment:AlignmentType.RIGHT,run:{size:24,color:'666666'}})]})};
+  const footers={default:new Footer({children:[new Paragraph({alignment:AlignmentType.CENTER,children:[dT('- ',{size:28}),new (DX().TextRun)({children:[PageNumber.CURRENT],size:28,sizeComplexScript:28}),dT(' -',{size:28})]})]})};
+  return {ch,extra:{headers,footers,margin:{top:1134,bottom:1134,left:1418,right:1134,header:567,footer:567}}};
+}
+$('#ppBook').onclick=()=>{ const {ch,extra}=bookDocx(PP.ex); saveDocx(ch,'ข้อสอบ-'+PP.ex.title,extra); };
 
 /* ---------- camera ---------- */
 async function startCam(){
@@ -1317,6 +1352,7 @@ const dclean = s => String(s ?? "").replace(/ /g," ").replace(/‌/g,"").replac
 function DX(){ if(!window.docx||!window.JSZip) throw new Error('โหลดไลบรารี Word ไม่สำเร็จ'); return window.docx; }
 const dT = (text,o={}) => new (DX().TextRun)({ text:dclean(text), ...o, ...(o.size?{sizeComplexScript:o.size}:{}) });
 const dP = (text,o={}) => { const {run,...rest}=o; return new (DX().Paragraph)({ children:[dT(text,run||{})], ...rest }); };
+const dTab = (text,o={}) => new (DX().TextRun)({ children:[new (DX().Tab)(), dclean(text)], ...o, ...(o.size?{sizeComplexScript:o.size}:{}) });
 const dH = (text,size=36) => dP(text,{run:{bold:true,size},spacing:{before:160,after:60}});
 function dTable(head, rows, widths){
   const {Table,TableRow,TableCell,WidthType,AlignmentType,ShadingType}=DX();
@@ -1326,12 +1362,12 @@ function dTable(head, rows, widths){
   return new Table({ width:{size:100,type:WidthType.PERCENTAGE},
     rows:[new TableRow({tableHeader:true,children:head.map((t,i)=>cell(t,true,i))}), ...rows.map(r=>new TableRow({children:r.map((t,i)=>cell(t,false,i))}))] });
 }
-function dBuild(children){
+function dBuild(children, extra={}){
   const {Document,AlignmentType}=DX();
   return new Document({ styles:{ default:{ document:{
       run:{ font:{ascii:TH_FONT,hAnsi:TH_FONT,cs:TH_FONT,eastAsia:TH_FONT}, size:TH_PT*2, sizeComplexScript:TH_PT*2, language:{value:'th-TH',eastAsia:'th-TH',bidirectional:'th-TH'} },
       paragraph:{ alignment:AlignmentType.THAI_DISTRIBUTE, spacing:{before:0,after:0,line:240} } } } },
-    sections:[{ properties:{ page:{ margin:{top:1440,bottom:1134,left:1701,right:1134} } }, children }] });
+    sections:[{ properties:{ page:{ margin:extra.margin||{top:1440,bottom:1134,left:1701,right:1134} } }, ...(extra.headers?{headers:extra.headers}:{}), ...(extra.footers?{footers:extra.footers}:{}), children }] });
 }
 async function addThaiCs(blob){
   const zip=await JSZip.loadAsync(blob); const THAI=/[฀-๿]/;
@@ -1347,8 +1383,8 @@ async function addThaiCs(blob){
   }
   return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
-async function saveDocx(children, name){
-  try{ toast('กำลังสร้างไฟล์ Word...'); const blob=await addThaiCs(await DX().Packer.toBlob(dBuild(children)));
+async function saveDocx(children, name, extra){
+  try{ toast('กำลังสร้างไฟล์ Word...'); const blob=await addThaiCs(await DX().Packer.toBlob(dBuild(children, extra)));
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name.replace(/[\\/:*?"<>|]/g,'_')+'.docx'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('ดาวน์โหลดรายงานแล้ว ✅'); }
   catch(e){ console.error(e); toast('สร้างไฟล์ไม่สำเร็จ: '+e.message); }
 }
