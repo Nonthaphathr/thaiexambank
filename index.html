@@ -1132,9 +1132,12 @@ function lvRender(){
   $('#lvAvg').style.width=avg+'%'; $('#lvAvgT').textContent=`ตอบแล้วเฉลี่ย ${Math.round(avg)}%`;
   $('#lvList').innerHTML=S.map(s=>{ const a=s.status==='done'?n:ansN(s), p=Math.round(a/n*100);
     const stt=s.status==='done'?(s.auto?`<span class="badge no">ส่งอัตโนมัติ</span>`:`<span class="badge ok">ส่งแล้ว</span>`):ex.liveStart?`<span class="badge wa">ข้อ ${(s.cur||0)+1}</span>`:`<span class="badge gr">รอ</span>`;
-    return `<div class="stat" style="padding:10px 12px"><div class="row between"><b style="font-size:.95rem">${esc(s.name)}</b>${stt}</div>
+    return `<div class="stat" style="padding:10px 12px"><div class="row between"><b style="font-size:.95rem">${esc(s.name)}</b><span style="white-space:nowrap">${stt} <button class="btn dan xs" data-lvdel="${esc(s.id)}" title="ลบรายชื่อนี้ออกจากห้องสอบ">🗑</button></span></div>
       <div class="muted sm">${esc(s.cls)} เลขที่ ${esc(s.no)}${s.sw?` · <span style="color:var(--no)">⚠️ สลับแท็บ ${s.sw}</span>`:''}</div>
       <div class="pbar" style="margin-top:6px"><i style="width:${p}%;${s.status==='done'?'background:var(--ok)':''}"></i></div><div class="sm muted" style="text-align:right">${a}/${n}</div></div>`; }).join('')||'<p class="muted">ยังไม่มีนักเรียนเข้าห้องสอบ — ส่งลิงก์/QR ให้นักเรียน</p>';
+  $$('#lvList [data-lvdel]').forEach(b=>b.onclick=async()=>{ const sb=LV.subs.find(x=>x.id===b.dataset.lvdel); if(!sb) return;
+    if(!await confirmBox(`ลบ "${sb.name}" (${sb.cls} เลขที่ ${sb.no}) ออกจากห้องสอบ?${sb.status==='done'?'\n⚠️ คนนี้ส่งคำตอบแล้ว — ผลสอบจะถูกลบด้วย':''}`)) return;
+    try{ await deleteDoc(doc(db,'exams',LV.id,'subs',sb.id)); toast('ลบรายชื่อแล้ว'); }catch(e){ toast('ลบไม่สำเร็จ: '+e.code); } });
 }
 
 /* =======================================================================
@@ -1646,6 +1649,9 @@ function startMon(){ clearInterval(MON);
 /* สอบพร้อมกัน: รอครูปล่อย / ครูสั่งจบ */
 function watchLive(){
   if(!EX.liveStart){ $('#sWait').classList.remove('hide'); $('#swName').textContent=TK.info.name+' · '+EX.title; }
+  let seen=false; onSnapshot(doc(db,'exams',EX.id,'subs',UID), s=>{ if(s.exists()){ seen=true; return; }
+    if(seen&&!submitting){ clearInterval(TIMER); STARTED=true; submitting=true; ['sWait','sExam'].forEach(x=>$('#'+x).classList.add('hide')); $('#sIntro').classList.remove('hide'); $('#sForm').classList.add('hide');
+      $('#sClosed').innerHTML='⚠️ ครูลบรายชื่อนี้ออกจากห้องสอบแล้ว (เช่น กรอกข้อมูลผิด) — <a href="javascript:location.reload()">กดที่นี่เพื่อเข้าห้องสอบใหม่</a>'; } }, ()=>{});
   onSnapshot(doc(db,'exams',EX.id), s=>{
     if(!s.exists()) return; const d=s.data(); EX.liveStart=d.liveStart; EX.liveEnd=d.liveEnd;
     if(d.liveEnd && d.liveEnd<=Date.now()+1000){ if(STARTED&&!submitting) submit(true,'ครูสิ้นสุดการสอบ'); else if(!STARTED){ $('#sWait').classList.add('hide'); STARTED=true; submit(true,'ครูสิ้นสุดการสอบ'); } return; }
