@@ -14,6 +14,7 @@
 <script src="https://cdn.jsdelivr.net/npm/docx@9/dist/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root{
   --or:#f97316; --or2:#fb923c; --or3:#fdba74; --orL:#fff1e6; --orD:#c2410c;
@@ -577,7 +578,9 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
         <label class="chk sm" style="margin-top:8px">จำนวนแผ่นกระดาษคำตอบ <input type="number" id="ppCopies" value="1" min="1" max="60" style="width:80px"></label></div>
       <div class="card" style="margin:0"><h3>2) สแกนตรวจ</h3><p class="muted sm">เปิดกล้องมือถือ ถ่ายให้เห็น <b>สี่เหลี่ยมดำครบ 4 มุม</b> วางกระดาษบนพื้นเรียบ แสงสว่างพอ</p>
         <div class="field"><label>ชั้น (ใช้กับทุกแผ่นที่สแกน)</label><input id="ppCls" placeholder="ม..."></div>
-        <button class="btn pri lg" id="ppScan">📷 เปิดกล้องสแกน</button></div>
+        <button class="btn pri lg" id="ppScan">📷 เปิดกล้องสแกน</button>
+        <button class="btn gho lg" id="ppPdf" style="margin-top:8px">📄 อัปโหลดไฟล์สแกน PDF / รูปภาพ (หลายแผ่นได้)</button>
+        <input type="file" id="ppFile" accept="application/pdf,.pdf,image/*" multiple class="hide"></div>
     </div>
     <p class="muted sm" style="margin-top:10px">รองรับสูงสุด 100 ข้อ · ข้อ ถูก/ผิด ให้ฝนช่อง ก = ถูก, ข = ผิด</p>
   </div>
@@ -597,6 +600,7 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
         <div class="stat center"><div class="v" id="ppScore">-</div><div class="l">คะแนน (ตรวจอัตโนมัติ)</div></div>
         <div class="row" style="margin-top:10px"><div class="grow field"><label>เลขที่ (อ่านจากกระดาษ)</label><input id="ppNo" type="number"></div><div class="grow field"><label>ชั้น</label><input id="ppCls2" placeholder="ม..."></div></div>
         <div class="field"><label>ชื่อ-สกุล</label><input id="ppName" placeholder="พิมพ์ชื่อนักเรียน"></div>
+        <p class="sm" id="ppQ" style="font-weight:600;color:var(--orD)"></p>
         <p class="sm" id ="ppWarn" style="color:var(--no)"></p>
         <div class="row"><button class="btn pri grow" id="ppSave">💾 บันทึกคะแนนเข้าระบบ</button><button class="btn gho" id="ppAgain">📷 สแกนใหม่</button></div>
       </div>
@@ -1140,14 +1144,14 @@ function omrLayout(n){
   const num=[0,1].map(row=>[...Array(10).keys()].map(d=>[122+d*6.7,54+row*8]));
   return {q,num};
 }
-let PP={ex:null,key:null,stream:null,raf:null,last:null};
+let PP={ex:null,key:null,stream:null,raf:null,last:null,q:[],qi:0};
 async function openPaper(id){
   const ex=EXAMS.find(e=>e.id===id); PP.ex=ex; PP.key=null;
   $('#ppSub').textContent=`${ex.title} · ${ex.subj} · ${ex.n} ข้อ`+(ex.n>OMR.maxQ?' (กระดาษคำตอบรองรับ 100 ข้อแรก)':'');
   ['ppCam','ppRes'].forEach(x=>$('#'+x).classList.add('hide')); $('#ppMenu').classList.remove('hide'); openM('mPaper');
   try{ PP.key=(await getDoc(doc(db,'exams',id,'private','key'))).data(); }catch(e){ toast('โหลดเฉลยไม่สำเร็จ'); }
 }
-$('#ppClose').onclick=()=>{ stopCam(); closeM('mPaper'); };
+$('#ppClose').onclick=()=>{ stopCam(); PP.q=[]; closeM('mPaper'); };
 function printHTML(title, body){
   const w=window.open('','_blank'); if(!w) return toast('เบราว์เซอร์บล็อกหน้าต่างใหม่ — อนุญาต pop-up ก่อน');
   w.document.write(`<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><title>${esc(title)}</title>
@@ -1229,7 +1233,41 @@ async function startCam(){
 function stopCam(){ cancelAnimationFrame(PP.raf); PP.raf=null; PP.stream?.getTracks().forEach(t=>t.stop()); PP.stream=null; }
 $('#ppScan').onclick=()=>{ if(!PP.key) return toast('ยังโหลดเฉลยไม่เสร็จ'); startCam(); };
 $('#ppStop').onclick=()=>{ stopCam(); $('#ppCam').classList.add('hide'); $('#ppMenu').classList.remove('hide'); };
-$('#ppAgain').onclick=()=>startCam();
+$('#ppAgain').onclick=()=>nextOrCam();
+function nextOrCam(){ if(PP.q.length){ PP.qi++; return showQueued(); } $('#ppQ').textContent=''; startCam(); }
+/* ===== อัปโหลด PDF / รูปสแกน หลายแผ่น ===== */
+$('#ppPdf').onclick=()=>{ if(!PP.key) return toast('ยังโหลดเฉลยไม่เสร็จ'); $('#ppFile').click(); };
+function canvasFrame(c){ return {c,g:c.getContext('2d',{willReadFrequently:true}),W:c.width,H:c.height}; }
+async function fileFrames(f){
+  const out=[];
+  if(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)){
+    const lib=window.pdfjsLib; if(!lib) throw new Error('โหลดตัวอ่าน PDF ไม่สำเร็จ');
+    lib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf=await lib.getDocument({data:await f.arrayBuffer()}).promise;
+    for(let i=1;i<=pdf.numPages;i++){ const pg=await pdf.getPage(i), v0=pg.getViewport({scale:1}), sc=Math.min(3,1800/Math.max(v0.width,v0.height)), vp=pg.getViewport({scale:sc});
+      const c=document.createElement('canvas'); c.width=Math.round(vp.width); c.height=Math.round(vp.height); const g=c.getContext('2d',{willReadFrequently:true});
+      g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); await pg.render({canvasContext:g,viewport:vp}).promise; out.push({c,label:`${f.name} หน้า ${i}`}); }
+  } else {
+    const img=await createImageBitmap(f), sc=Math.min(1,2200/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+    c.getContext('2d',{willReadFrequently:true}).drawImage(img,0,0,c.width,c.height); out.push({c,label:f.name});
+  }
+  return out;
+}
+$('#ppFile').onchange=async e=>{ const files=[...e.target.files]; e.target.value=''; if(!files.length) return;
+  stopCam(); toast('กำลังอ่านไฟล์...'); const q=[];
+  try{ for(const f of files) q.push(...await fileFrames(f)); }catch(err){ console.error(err); return toast('อ่านไฟล์ไม่สำเร็จ: '+err.message); }
+  if(!q.length) return toast('ไม่พบหน้าในไฟล์');
+  PP.q=q; PP.qi=0; PP.saved=0; PP.skip=[]; showQueued(); };
+function showQueued(){
+  while(PP.qi<PP.q.length){ const it=PP.q[PP.qi], f=canvasFrame(it.c), pts=findFiducials(f);
+    if(pts){ readSheet(f,pts); $('#ppMenu').classList.add('hide');
+      $('#ppQ').textContent=`📄 แผ่นที่ ${PP.qi+1}/${PP.q.length} · ${it.label}`; $('#ppAgain').textContent=PP.qi+1<PP.q.length?'⏭ ข้ามแผ่นนี้':'⏹ ข้ามแผ่นนี้ (แผ่นสุดท้าย)'; return; }
+    PP.skip.push(it.label); PP.qi++; }
+  const sk=PP.skip||[]; PP.q=[]; $('#ppQ').textContent=''; $('#ppAgain').textContent='📷 สแกนใหม่';
+  $('#ppRes').classList.add('hide'); $('#ppCam').classList.add('hide'); $('#ppMenu').classList.remove('hide');
+  toast(`ตรวจไฟล์ครบแล้ว — บันทึก ${PP.saved||0} แผ่น`+(sk.length?` · หา 4 มุมไม่เจอ ${sk.length} แผ่น`:''));
+  if(sk.length) textModal('แผ่นที่หาสี่เหลี่ยม 4 มุมไม่พบ (ตรวจไม่ได้)', sk.join('\n')+'\n\nแนะนำ: สแกนใหม่ให้เห็นสี่เหลี่ยมดำครบ 4 มุม ความละเอียด 200 dpi ขึ้นไป');
+}
 function grabFrame(){ const v=$('#ppVid'), c=document.createElement('canvas'); c.width=v.videoWidth; c.height=v.videoHeight; const g=c.getContext('2d',{willReadFrequently:true}); g.drawImage(v,0,0); return {c,g,W:c.width,H:c.height}; }
 function toGray(data,W,H){ const g=new Uint8ClampedArray(W*H); for(let i=0,j=0;i<g.length;i++,j+=4) g[i]=(data[j]*299+data[j+1]*587+data[j+2]*114)/1000; return g; }
 function otsu(g){ const h=new Array(256).fill(0); g.forEach(v=>h[v]++); let s=0; for(let i=0;i<256;i++) s+=i*h[i];
@@ -1305,11 +1343,10 @@ function renderPaperAns(){
 $('#ppSave').onclick=async()=>{
   const cls=$('#ppCls2').value.trim(), no=$('#ppNo').value.trim(), name=$('#ppName').value.trim()||`นักเรียน ${cls} เลขที่ ${no}`;
   if(!cls||!no) return toast('กรอกชั้นและเลขที่');
-  const id=('paper_'+cls+'_'+no).replace(/[\/\s.#$\[\]]/g,'-'); $('#ppCls').value=cls;
-  try{ const ref=doc(db,'exams',PP.ex.id,'subs',id), old=await getDoc(ref);
-    if(old.exists() && !await confirmBox(`มีผลของ ${cls} เลขที่ ${no} อยู่แล้ว บันทึกทับ?`)) return;
+  const id=('paper_'+cls+'_'+no+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)).replace(/[\/\s.#$\[\]]/g,'-'); $('#ppCls').value=cls;
+  try{ const ref=doc(db,'exams',PP.ex.id,'subs',id);
     await setDoc(ref,{uid:id,name,cls,no,status:'done',paper:true,ans:PP.res.ans,sw:0,order:PP.ex.qs.map((_,i)=>i),startMs:null,endMs:Date.now(),endAt:serverTimestamp()});
-    toast(`บันทึก ${name} แล้ว ✅ สแกนแผ่นต่อไปได้เลย`); startCam();
+    toast(`บันทึก ${name} แล้ว ✅`); PP.saved=(PP.saved||0)+1; nextOrCam();
   }catch(e){ console.error(e); toast('บันทึกไม่สำเร็จ: '+(e.code||e.message)); }
 };
 
@@ -1426,10 +1463,11 @@ async function anaLoad(){
   $('#aHard').innerHTML=done.length?qc.map(x=>`<div class="wrongq"><b>ข้อ ${x.i+1}</b> ${esc(x.q.q)} <span class="badge no">ผิด ${x.w}/${done.length} คน</span> <span class="badge">${esc(x.q.tp)}</span><br><span class="muted sm">เฉลย: ${esc(x.q.o[AN.key.key[x.i]])}</span></div>`).join(''):'<span class="muted">ยังไม่มีผู้ส่ง</span>';
   anaTable();
 }
+let DUPK=new Set();
 function anaTable(){
-  const q=$('#aSearch').value.trim();
+  const q=$('#aSearch').value.trim(); const cnt={}; AN.rows.forEach(r=>{ const k=String(r.s.cls).trim()+'|'+String(r.s.no).trim(); cnt[k]=(cnt[k]||0)+1; }); DUPK=new Set(Object.keys(cnt).filter(k=>cnt[k]>1));
   $('#aBody').innerHTML=AN.rows.filter(r=>!q||(r.s.name+' '+r.s.cls).includes(q)).map((r,i)=>`<tr>
-    <td>${r.rank||'-'}</td><td>${esc(r.s.name)}</td><td>${esc(r.s.cls)} / ${esc(r.s.no)}</td>
+    <td>${r.rank||'-'}</td><td>${esc(r.s.name)} ${r.s.paper?'<span class="badge gr">🧾 กระดาษ</span>':'<span class="badge">📱 ออนไลน์</span>'}${DUPK.has(String(r.s.cls).trim()+'|'+String(r.s.no).trim())?' <span class="badge wa" title="มีผลมากกว่า 1 รายการที่ชั้น/เลขที่เดียวกัน — ตรวจสอบ">⚠️ เลขที่ซ้ำ</span>':''}</td><td>${esc(r.s.cls)} / ${esc(r.s.no)}</td>
     <td><b>${r.g.score}/${r.g.n}</b> <span class="badge ${levelOf(r.g.p)[1]}">${r.g.p}%</span></td>
     <td>${r.s.sw?`<span class="badge no">${r.s.sw}</span>`:'0'}</td>
     <td>${r.s.status==='done'?(r.s.auto?'<span class="badge no">ส่งอัตโนมัติ</span>':'<span class="badge ok">ส่งแล้ว</span>'):'<span class="badge wa">กำลังทำ</span>'}</td>
