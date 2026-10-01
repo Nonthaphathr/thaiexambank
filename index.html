@@ -355,6 +355,14 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
       <h3 style="margin-top:18px">ℹ️ เกี่ยวกับระบบ</h3>
       <p class="muted sm">ระบบคลังข้อสอบวิชาภาษาไทย<br>พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง<br>Firebase Firestore + Anonymous Auth</p>
     </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3>📤 ส่งออกผลคะแนนการทดสอบ</h3>
+      <p class="muted sm">ติ๊กเลือกชุดข้อสอบที่ต้องการ ส่งออกเป็นไฟล์ .xlsx ไฟล์เดียว แยกชีทตามชุดข้อสอบ เรียงตามเลขที่ (ชั้นตัด / ออก เช่น ม.2/1 → ม.2, คำนำหน้าปรับเป็นรูปแบบเดียว, เลขที่ซ้ำเรียงตามพยัญชนะต้นของชื่อ)</p>
+      <div style="margin:8px 0"><label><input type="checkbox" id="xpAll"> เลือกทั้งหมด</label></div>
+      <div id="xpList" class="clist" style="max-height:260px;overflow:auto"></div>
+      <label style="display:block;margin:8px 0"><input type="checkbox" id="xpDone" checked> เฉพาะผู้ที่ส่งแล้ว</label>
+      <button class="btn pri" id="xpGo">📊 ส่งออก .xlsx</button>
+    </div>
   </div>
 </section>
 
@@ -747,7 +755,7 @@ $('#sLogout').onclick=async()=>{ if(!await confirmBox('ออกจากระ�
 let BANK=[], EXAMS=[], SEL=new Set();
 async function enterTeacher(){
   $('#nav').classList.remove('hide');
-  $$('#nav button').forEach(b=>b.onclick=()=>{ showView(b.dataset.v); if(b.dataset.v==='vBuild') renderBuild(); if(b.dataset.v==='vExams') loadExams(); if(b.dataset.v==='vAna') anaInit(); });
+  $$('#nav button').forEach(b=>b.onclick=()=>{ showView(b.dataset.v); if(b.dataset.v==='vBuild') renderBuild(); if(b.dataset.v==='vExams') loadExams(); if(b.dataset.v==='vAna') anaInit(); if(b.dataset.v==='vSet') xpInit(); });
   showView('vBank'); await loadBank();
 }
 async function loadBank(){
@@ -1495,6 +1503,50 @@ $('#aCsv').onclick=()=>{ if(!AN.rows?.length) return toast('ยังไม่�
   const rows=[['ลำดับ','ชื่อ-สกุล','ชั้น','เลขที่','คะแนน','เต็ม','ร้อยละ','ระดับ','สลับแท็บ','สถานะ',...tps.map(t=>'หัวข้อ:'+t)].join(',')]
     .concat(AN.rows.map(r=>[r.rank||'',r.s.name,r.s.cls,r.s.no,r.g.score,r.g.n,r.g.p,levelOf(r.g.p)[0],r.s.sw||0,r.s.status,...tps.map(t=>r.g.topics[t]?pct(r.g.topics[t].c,r.g.topics[t].n):'')].map(csvCell).join(',')));
   download('ผลสอบ-'+AN.ex.title+'.csv',rows.join('\n'),'text/csv'); };
+
+/* ===== ส่งออกผลคะแนน (ตั้งค่า) ===== */
+const thSort=(a,b)=>String(a).localeCompare(String(b),'th');
+function normCls(c){ c=String(c??'').trim().replace(/[๐-๙]/g,d=>'๐๑๒๓๔๕๖๗๘๙'.indexOf(d)); const m=c.match(/(\d+)/); if(m) return 'ม.'+m[1]; return c.split('/')[0].trim(); }
+const PFX=[['ด.ช.',['เด็กชาย','ดช','ดชาย','ดเชย','ด.ช']],['ด.ญ.',['เด็กหญิง','ดญ','ดหญิง','ด.ญ']],['นางสาว',['นางสาว','นส','นางสว','นสาว','น.ส']],['นาง',['นาง']],['นาย',['นาย']]];
+function splitPrefix(full){
+  full=String(full??'').trim().replace(/\s+/g,' ');
+  const raw=full.replace(/[\s.,]/g,'');
+  for(const [std,vars] of PFX){ for(const v of [...vars].sort((a,b)=>b.length-a.length)){ const vv=v.replace(/[\s.,]/g,'');
+    if(raw.startsWith(vv)){ // ตัดคำนำหน้าออกจากสตริงเดิมแบบไม่สนจุด/ช่องว่าง
+      let i=0,k=0; while(i<full.length&&k<vv.length){ if(!/[\s.,]/.test(full[i])) k++; i++; }
+      return [std, full.slice(i).replace(/^[\s.,]+/,'').trim()]; } } }
+  return ['', full];
+}
+const firstCons=n=>{ const m=String(n).match(/[ก-ฮ]/); return m?m[0]:'ฮฮ'; };
+function buildSheetRows(ex,key,subs,onlyDone){
+  let L=subs.filter(s=>!onlyDone||s.status==='done').map(s=>{ const g=gradeSub(ex,key,s); const [pf,nm]=splitPrefix(s.name);
+    return {no:parseInt(String(s.no).trim(),10), noRaw:s.no, cls:normCls(s.cls), pf, nm, g, st:s.status==='done'?'ส่งแล้ว':'กำลังทำ'}; });
+  L.sort((a,b)=>thSort(a.cls,b.cls)|| ((isNaN(a.no)?1e9:a.no)-(isNaN(b.no)?1e9:b.no)) || thSort(firstCons(a.nm),firstCons(b.nm)) || thSort(a.nm,b.nm));
+  return [['เลขที่','ชั้น','คำนำหน้า','ชื่อ-สกุล','คะแนน','เต็ม','ร้อยละ','ระดับ','สถานะ'],
+    ...L.map(r=>[isNaN(r.no)?r.noRaw:r.no,r.cls,r.pf,r.nm,r.g.score,r.g.n,r.g.p,levelOf(r.g.p)[0],r.st])];
+}
+async function xpInit(){
+  if(!EXAMS.length) await loadExams();
+  $('#xpList').innerHTML=EXAMS.map(x=>`<label style="display:block;padding:4px 0"><input type="checkbox" class="xpc" value="${x.id}"> ${esc(x.title)} · ${esc(x.subj||'')}</label>`).join('')||'<span class="muted">ยังไม่มีชุดข้อสอบ</span>';
+  $('#xpAll').checked=false;
+}
+$('#xpAll').onchange=e=>$$('.xpc').forEach(c=>c.checked=e.target.checked);
+$('#xpGo').onclick=async()=>{
+  const ids=$$('.xpc:checked').map(c=>c.value); if(!ids.length) return toast('กรุณาติ๊กเลือกอย่างน้อย 1 ชุดข้อสอบ');
+  if(!window.XLSX) return toast('โหลดไลบรารี Excel ไม่สำเร็จ');
+  const btn=$('#xpGo'); btn.disabled=true; btn.textContent='กำลังส่งออก...';
+  try{
+    const wb=XLSX.utils.book_new(), used=new Set();
+    for(const id of ids){ const ex=EXAMS.find(x=>x.id===id);
+      const [k,s]=await Promise.all([getDoc(doc(db,'exams',id,'private','key')),getDocs(collection(db,'exams',id,'subs'))]);
+      const rows=buildSheetRows(ex,k.data(),s.docs.map(d=>({id:d.id,...d.data()})),$('#xpDone').checked);
+      const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[8,8,10,28,8,8,9,14,10].map(w=>({wch:w}));
+      let nm=String(ex.title||'ชีท').replace(/[\\/?*\[\]:]/g,' ').trim().slice(0,28)||'ชีท', n=nm, i=2; while(used.has(n)) n=nm.slice(0,26)+' '+(i++); used.add(n);
+      XLSX.utils.book_append_sheet(wb,ws,n); }
+    XLSX.writeFile(wb,`ผลคะแนนการทดสอบ-${new Date().toISOString().slice(0,10)}.xlsx`); toast('ส่งออกสำเร็จ ✅');
+  }catch(e){ console.error(e); toast('ส่งออกไม่สำเร็จ: '+(e.code||e.message)); }
+  btn.disabled=false; btn.textContent='📊 ส่งออก .xlsx';
+};
 
 /* =======================================================================
    DOCX REPORT (docx-js + JSZip, ใส่ <w:cs/> ให้ภาษาไทยตัดคำถูก)
