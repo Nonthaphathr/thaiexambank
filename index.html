@@ -164,6 +164,26 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
 .box.s{background:var(--okL)} .box.w{background:var(--noL)} .box.r{background:#eef2ff}
 .box h4{margin:0 0 6px;font-size:.98rem}
 .box ul{margin:0;padding-left:20px;font-size:.92rem}
+.a4p{position:fixed;left:-10000px;top:0;width:794px;height:1123px;background:#fff;overflow:hidden;color:#1f2937;font-family:'Sarabun',sans-serif;line-height:1.35}
+.a4p *{box-sizing:border-box}
+.a4i{padding:1.9em 2.2em 1.2em}
+.a4h{display:flex;align-items:center;gap:1em;background:linear-gradient(135deg,#c2410c,#f97316);color:#fff;border-radius:1.1em;padding:.9em 1.2em}
+.a4h img{width:3.8em;height:3.8em;border-radius:.9em;background:#fff;object-fit:contain}
+.a4n{font-size:1.6em;font-weight:700;line-height:1.2}.a4s{font-size:.92em;opacity:.95}
+.a4r{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}.a4r b{font-size:1.15em}.a4r span{font-size:.85em}
+.a4k{display:grid;grid-template-columns:repeat(4,1fr);gap:.7em;margin:.9em 0}
+.a4k>div{background:#fff7ed;border:1px solid #fed7aa;border-radius:.9em;padding:.6em .8em}
+.a4k b{display:block;font-size:1.7em;line-height:1.15;color:#c2410c}.a4k span{font-size:.82em;color:#6b7280}
+.a4c{display:grid;grid-template-columns:1.1fr 1fr;gap:1.1em}
+.a4p h4{margin:.5em 0 .3em;font-size:1em;color:#c2410c}.a4p h4 small{font-weight:400;color:#6b7280;font-size:.8em}
+.a4b{margin:.45em 0}.a4bt{display:flex;justify-content:space-between;font-size:.88em;gap:.5em}
+.a4bb{position:relative;height:.85em;background:#f3f4f6;border-radius:99px;margin-top:.2em;overflow:visible}
+.a4bb i{display:block;height:100%;border-radius:99px}.a4bb s{position:absolute;top:-.2em;bottom:-.2em;width:2px;background:#1f2937;text-decoration:none}
+.a4x{border-radius:.9em;padding:.6em .9em;margin-bottom:.6em}.a4x.s{background:#dcfce7}.a4x.w{background:#fee2e2}.a4x.r{background:#eef2ff}
+.a4x h4{margin:0 0 .25em}.a4x ul{margin:0;padding-left:1.3em;font-size:.88em}
+.a4w{margin-top:.5em;border-left:3px solid #dc2626;background:#fff5f5;border-radius:0 .7em .7em 0;padding:.5em .8em}.a4w h4{margin:0 0 .3em;color:#dc2626}
+.a4w span{display:inline-block;min-width:1.9em;text-align:center;background:#fee2e2;color:#b91c1c;border-radius:.5em;margin:.12em .2em .12em 0;padding:0 .35em;font-size:.88em;font-weight:600}
+.a4f{text-align:center;color:#6b7280;font-size:.8em;margin-top:.9em}
 .wrongq{font-size:.88rem;border-left:3px solid var(--no);padding:6px 10px;margin:6px 0;background:#fff;border-radius:0 10px 10px 0}
 .foot{text-align:center;color:var(--mut);font-size:.82rem;margin-top:30px}
 .drop{border:2px dashed var(--or3);border-radius:16px;padding:18px;text-align:center;background:rgba(255,241,230,.5);cursor:pointer}
@@ -322,7 +342,7 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
       <div class="grow field" style="margin:0;flex:2"><select id="aExam"></select></div>
       <button class="btn gho" id="aLoad">↻ โหลดผล</button>
       <button class="btn gho" id="aCsv">⬇ ผลคะแนน CSV</button>
-      <button class="btn gho" id="aDocx">📄 รายงานทั้งกลุ่ม .docx</button>
+      <button class="btn gho" id="aDocx">📑 รายงานทั้งกลุ่ม (เลือกหลายชุด + บันทึกข้อความ) .docx</button>
     </div>
   </div>
   <div id="aClass" class="hide">
@@ -516,6 +536,37 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
   <div class="row between" style="margin-bottom:10px"><h3 style="margin:0">📊 ผลวิเคราะห์ผู้เรียนรายบุคคล</h3>
     <div class="row"><button class="btn gho xs" id="anImg">🖼 บันทึกเป็นภาพ</button><button class="btn gho xs" id="anDocx">📄 รายงาน .docx</button><button class="btn gho xs" id="anTxt">📋 คัดลอกข้อความแจ้งผู้เรียน</button><button class="btn gho xs" data-close>✕</button></div></div>
   <div id="anaWrap"></div>
+</div></div>
+
+<!-- report builder (multi-exam + memo cover) -->
+<div class="ovl" id="mRpt"><div class="sheet" style="max-width:780px">
+  <div class="row between" style="margin-bottom:8px"><h3 style="margin:0">📑 ออกรายงานผลการสอบและวิเคราะห์ผู้เรียน</h3><button class="btn gho xs" data-close>✕</button></div>
+  <h4 style="margin:10px 0 4px">1) เลือกชุดข้อสอบที่ต้องการออกรายงาน <span class="muted sm" id="rpCnt"></span></h4>
+  <div><label><input type="checkbox" id="rpAll"> เลือกทั้งหมด</label></div>
+  <div id="rpList" class="clist" style="max-height:200px;overflow:auto"></div>
+  <h4 style="margin:14px 0 4px">2) บันทึกข้อความปะหน้ารายงาน</h4>
+  <label><input type="checkbox" id="rpMemo" checked> แนบบันทึกข้อความปะหน้าก่อนตารางรายงาน (แบบ TH SarabunIT๙)</label>
+  <div id="rpForm" style="margin-top:8px">
+    <div class="grid g2">
+      <div class="field"><label class="sm muted">ส่วนราชการ</label><input id="rpOrg" list="rpOrgL" placeholder="เช่น กลุ่มสาระการเรียนรู้ภาษาไทย โรงเรียนกระดุมทองวิทยา ..."></div>
+      <div class="field"><label class="sm muted">ที่ (เว้นว่างได้ — จะเป็นจุดไข่ปลาให้กรอกมือ)</label><input id="rpNo" placeholder="ศก 51008.08/............"></div>
+      <div class="field"><label class="sm muted">วันที่</label><input id="rpDate"></div>
+      <div class="field"><label class="sm muted">เรียน</label><input id="rpTo" list="rpToL" placeholder="ผู้อำนวยการโรงเรียน..."></div>
+    </div>
+    <div class="field"><label class="sm muted">เรื่อง</label><input id="rpSub"></div>
+    <div class="field"><label class="sm muted">เนื้อความ (แก้ไขได้ — ขึ้นบรรทัดใหม่ = ย่อหน้าใหม่)</label><textarea id="rpBody" rows="4"></textarea></div>
+    <div class="grid g2">
+      <div class="field"><label class="sm muted">ประโยคปิด</label><input id="rpClose"></div>
+      <div class="field"><label class="sm muted">ผู้ลงนาม (ชื่อ-สกุล)</label><input id="rpSigN" list="rpSigL" placeholder="เช่น นายนนทพัทธ์ หิรัญเรือง"></div>
+    </div>
+    <div class="field"><label class="sm muted">ตำแหน่งผู้ลงนาม (ใช้ | คั่นเพื่อขึ้นบรรทัดใหม่)</label><input id="rpSigP" placeholder="ครู|หัวหน้ากลุ่มสาระการเรียนรู้ภาษาไทย"></div>
+    <div class="field"><label class="sm muted">ความเห็นผู้บังคับบัญชา (ไม่บังคับ — 1 บรรทัดต่อ 1 คน: ตำแหน่งที่ให้ความเห็น | ชื่อ-สกุล | ตำแหน่ง)</label><textarea id="rpOp" rows="3" placeholder="หัวหน้ากลุ่มบริหารงานวิชาการ | ชื่อ-สกุล | หัวหน้ากลุ่มบริหารงานวิชาการ"></textarea></div>
+    <datalist id="rpOrgL"><option value="กลุ่มสาระการเรียนรู้ภาษาไทย โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ"><option value="กลุ่มบริหารงานวิชาการ โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ"></datalist>
+    <datalist id="rpToL"><option value="ผู้อำนวยการโรงเรียนกระดุมทองวิทยา"></datalist>
+    <datalist id="rpSigL"><option value="นายนนทพัทธ์ หิรัญเรือง"></datalist>
+  </div>
+  <button class="btn pri" id="rpGo" style="margin-top:12px">📄 สร้างรายงาน .docx</button>
+  <p class="muted sm">ไฟล์เดียว: บันทึกข้อความปะหน้า → รายงานแต่ละชุดข้อสอบ (พร้อมกราฟและตาราง) ค่าที่กรอกจะจำไว้ใช้ครั้งต่อไป</p>
 </div></div>
 
 <!-- consent (pre-exam) -->
@@ -1493,10 +1544,9 @@ function anaTable(){
 }
 let CUR_ANA=null;
 function openStuAna(id){
-  const r=AN.rows.find(x=>x.s.id===id); const extra={rank:r.rank,total:AN.rows.filter(x=>x.s.status==='done').length,avg:AN.avg};
+  const r=AN.rows.find(x=>x.s.id===id); const extra={rank:r.rank,total:AN.rows.filter(x=>x.s.status==='done').length,avg:AN.avg,topicAvg:topicAvgMap(AN.rows)};
   $('#anaWrap').innerHTML=anaHTML(AN.ex,AN.key,r.s,r.g,extra); CUR_ANA={r,extra}; openM('mAna');
 }
-$('#anImg').onclick=()=>saveImage($('#anaBox'),'วิเคราะห์-'+CUR_ANA.r.s.name);
 $('#anTxt').onclick=()=>textModal('📋 ข้อความแจ้งผู้เรียน',anaText(AN.ex,CUR_ANA.r.s,CUR_ANA.r.g,CUR_ANA.extra));
 $('#aCsv').onclick=()=>{ if(!AN.rows?.length) return toast('ยังไม่มีข้อมูล');
   const tps=Object.keys(AN.rows[0].g.topics);
@@ -1557,21 +1607,23 @@ function DX(){ if(!window.docx||!window.JSZip) throw new Error('โหลดไ�
 const dT = (text,o={}) => new (DX().TextRun)({ text:dclean(text), ...o, ...(o.size?{sizeComplexScript:o.size}:{}) });
 const dP = (text,o={}) => { const {run,...rest}=o; return new (DX().Paragraph)({ children:[dT(text,run||{})], ...rest }); };
 const dTab = (text,o={}) => new (DX().TextRun)({ children:[new (DX().Tab)(), dclean(text)], ...o, ...(o.size?{sizeComplexScript:o.size}:{}) });
-const dH = (text,size=36) => dP(text,{run:{bold:true,size},spacing:{before:160,after:60}});
+const dH = (text,size=36) => dP(text,{run:{bold:true,size,color:'C2410C'},spacing:{before:200,after:60},keepNext:true});
 function dTable(head, rows, widths){
-  const {Table,TableRow,TableCell,WidthType,AlignmentType,ShadingType}=DX();
-  const cell=(t,h,i)=>new TableCell({ width:widths?{size:widths[i],type:WidthType.PERCENTAGE}:undefined,
-    shading:h?{type:ShadingType.CLEAR,fill:'FDE7D3',color:'auto'}:undefined,
-    children:[dP(String(t),{alignment:(h||i>0&&widths&&widths[i]<=15)?AlignmentType.CENTER:AlignmentType.LEFT,run:h?{bold:true}:{}})] });
-  return new Table({ width:{size:100,type:WidthType.PERCENTAGE},
-    rows:[new TableRow({tableHeader:true,children:head.map((t,i)=>cell(t,true,i))}), ...rows.map(r=>new TableRow({children:r.map((t,i)=>cell(t,false,i))}))] });
+  const {Table,TableRow,TableCell,WidthType,AlignmentType,ShadingType,BorderStyle}=DX(); const bd={style:BorderStyle.SINGLE,size:4,color:'F4B183'};
+  const cell=(t,h,i,z)=>new TableCell({ width:widths?{size:widths[i],type:WidthType.PERCENTAGE}:undefined,
+    shading:h?{type:ShadingType.CLEAR,fill:'F97316',color:'auto'}:z?{type:ShadingType.CLEAR,fill:'FFF7F0',color:'auto'}:undefined,
+    margins:{top:40,bottom:40,left:100,right:100},
+    children:[dP(String(t),{alignment:(h||i>0&&widths&&widths[i]<=15)?AlignmentType.CENTER:AlignmentType.LEFT,run:h?{bold:true,color:'FFFFFF'}:{}})] });
+  return new Table({ width:{size:100,type:WidthType.PERCENTAGE}, borders:{top:bd,bottom:bd,left:bd,right:bd,insideHorizontal:bd,insideVertical:bd},
+    rows:[new TableRow({tableHeader:true,cantSplit:true,children:head.map((t,i)=>cell(t,true,i))}), ...rows.map((r,ri)=>new TableRow({cantSplit:true,children:r.map((t,i)=>cell(t,false,i,ri%2===1))}))] });
 }
 function dBuild(children, extra={}){
   const {Document,AlignmentType}=DX();
   return new Document({ styles:{ default:{ document:{
       run:{ font:{ascii:TH_FONT,hAnsi:TH_FONT,cs:TH_FONT,eastAsia:TH_FONT}, size:TH_PT*2, sizeComplexScript:TH_PT*2, language:{value:'th-TH',eastAsia:'th-TH',bidirectional:'th-TH'} },
-      paragraph:{ alignment:AlignmentType.THAI_DISTRIBUTE, spacing:{before:0,after:0,line:240} } } } },
-    sections:[{ properties:{ page:{ margin:extra.margin||{top:1440,bottom:1134,left:1701,right:1134} } }, ...(extra.headers?{headers:extra.headers}:{}), ...(extra.footers?{footers:extra.footers}:{}), children }] });
+      paragraph:{ alignment:AlignmentType.THAI_DISTRIBUTE, spacing:{before:0,after:0,line:240,lineRule:'auto'} } } } },
+    sections: extra.sections ? extra.sections.map(sc=>({ properties:{ page:{ margin:sc.margin||{top:1440,bottom:1134,left:1701,right:1134} } }, children:sc.children })) :
+      [{ properties:{ page:{ margin:extra.margin||{top:1440,bottom:1134,left:1701,right:1134} } }, ...(extra.headers?{headers:extra.headers}:{}), ...(extra.footers?{footers:extra.footers}:{}), children }] });
 }
 async function addThaiCs(blob){
   const zip=await JSZip.loadAsync(blob); const THAI=/[฀-๿]/;
@@ -1587,7 +1639,7 @@ async function addThaiCs(blob){
   }
   return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
 }
-async function saveDocx(children, name, extra){
+async function saveDocx(children, name, extra={}){
   try{ toast('กำลังสร้างไฟล์ Word...'); const blob=await addThaiCs(await DX().Packer.toBlob(dBuild(children, extra)));
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name.replace(/[\\/:*?"<>|]/g,'_')+'.docx'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('ดาวน์โหลดรายงานแล้ว ✅'); }
   catch(e){ console.error(e); toast('สร้างไฟล์ไม่สำเร็จ: '+e.message); }
@@ -1596,49 +1648,286 @@ function dSign(){ const {AlignmentType}=DX(); return [dP(''),dP(''),
   dP('ลงชื่อ ....................................................... ครูผู้สอน',{alignment:AlignmentType.RIGHT}),
   dP('(นายนนทพัทธ์ หิรัญเรือง)',{alignment:AlignmentType.RIGHT,indent:{right:1100}}),
   dP('วันที่ '+new Date().toLocaleDateString('th-TH',{dateStyle:'long'}),{alignment:AlignmentType.RIGHT,indent:{right:1100}})]; }
-function studentDocx(ex,key,sub,g,extra){
-  const {AlignmentType}=DX(); const A=adviceFor(g,sub,extra.avg); const [lvT]=levelOf(g.p);
+/* =======================================================================
+   ชุดรายงาน: กราฟ + อินโฟกราฟิก (canvas → PNG ฝังใน Word) + บันทึกข้อความปะหน้า
+   ======================================================================= */
+const GARUDA_B64="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";
+const b64u8=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const CF="Sarabun, 'TH Sarabun New', sans-serif";
+const LV_ORDER=['จำ','เข้าใจ','ประยุกต์','วิเคราะห์','ประเมินค่า','สร้างสรรค์'];
+async function chartFonts(){ try{ await Promise.all(['400 16px Sarabun','700 16px Sarabun'].map(f=>document.fonts.load(f))); }catch(e){} }
+function mkCanvas(w,h,draw){ const S=2,c=document.createElement('canvas'); c.width=w*S; c.height=h*S; const x=c.getContext('2d'); x.scale(S,S); x.fillStyle='#fff'; x.fillRect(0,0,w,h); draw(x,w,h); return c; }
+const cvPng=c=>new Promise(r=>c.toBlob(async b=>r(new Uint8Array(await b.arrayBuffer())),'image/png'));
+function rr(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
+function txt(x,t,a,b,{size=16,w=400,col='#1f2937',al='left'}={}){ x.font=`${w} ${size}px ${CF}`; x.fillStyle=col; x.textAlign=al; x.textBaseline='alphabetic'; x.fillText(String(t),a,b); }
+function ell(x,t,maxW,size=20){ x.font=`400 ${size}px ${CF}`; t=String(t); if(x.measureText(t).width<=maxW) return t; while(t.length>1&&x.measureText(t+'…').width>maxW) t=t.slice(0,-1); return t+'…'; }
+function donut(x,cx,cy,R,r,parts){ const rad=(R+r)/2; x.lineWidth=R-r; x.lineCap='butt'; x.strokeStyle='#f3f4f6'; x.beginPath(); x.arc(cx,cy,rad,0,Math.PI*2); x.stroke();
+  let a=-Math.PI/2; const tot=parts.reduce((s,p)=>s+p.v,0)||1;
+  parts.forEach(p=>{ if(p.v<=0) return; const d=p.v/tot*Math.PI*2; x.strokeStyle=p.col; x.beginPath(); x.arc(cx,cy,rad,a,a+d); x.stroke(); a+=d; }); }
+function topicAvgMap(rows){ const tp={}; rows.filter(r=>r.s.status==='done').forEach(r=>Object.entries(r.g.topics).forEach(([k,v])=>{ tp[k]=tp[k]||{n:0,c:0}; tp[k].n+=v.n; tp[k].c+=v.c; }));
+  const o={}; Object.entries(tp).forEach(([k,v])=>o[k]=pct(v.c,v.n)); return o; }
+
+/* ภาพที่ 1 อินโฟกราฟิกสรุปผลรายบุคคล */
+function chartBanner(g,extra,lv,dur){
+  const W=1000,H=270;
+  return mkCanvas(W,H,x=>{
+    const gr=x.createLinearGradient(0,0,W,H); gr.addColorStop(0,'#fff7ed'); gr.addColorStop(1,'#ffedd5');
+    rr(x,0,0,W,H,22); x.fillStyle=gr; x.fill(); x.strokeStyle='#fdba74'; x.lineWidth=2; rr(x,1,1,W-2,H-2,22); x.stroke();
+    donut(x,150,135,108,78,[{v:g.p,col:lv[2]},{v:100-g.p,col:'#f3f4f6'}]);
+    txt(x,`${g.score}/${g.n}`,150,142,{size:42,w:700,col:'#c2410c',al:'center'});
+    txt(x,`ร้อยละ ${g.p}`,150,174,{size:21,col:'#6b7280',al:'center'});
+    const tiles=[['ระดับผลการสอบ',lv[0],lv[2]],['ลำดับที่ในกลุ่ม',extra.rank?`${extra.rank} / ${extra.total}`:'-','#c2410c'],['ค่าเฉลี่ยของกลุ่ม',extra.avg!=null?extra.avg+'%':'-','#c2410c'],['เวลาที่ใช้ทำข้อสอบ',dur,'#c2410c']];
+    tiles.forEach((t,i)=>{ const tx=310+(i%2)*345, ty=22+Math.floor(i/2)*118;
+      rr(x,tx,ty,325,104,16); x.fillStyle='#fff'; x.fill(); x.strokeStyle='#fed7aa'; x.lineWidth=1.5; x.stroke();
+      txt(x,t[0],tx+20,ty+34,{size:20,col:'#6b7280'}); txt(x,t[1],tx+20,ty+84,{size:38,w:700,col:t[2]}); });
+  });
+}
+/* แท่งแนวนอนรายหัวข้อ (+ เส้นเกณฑ์ 50/75 และตำแหน่งค่าเฉลี่ยกลุ่ม) */
+function chartTopics(items,showAvg){
+  const W=1000,rowH=54,top=74,H=top+items.length*rowH+16;
+  return mkCanvas(W,H,x=>{
+    const L=310,R=850,bw=R-L;
+    rr(x,L,18,22,14,4); x.fillStyle='#22c55e'; x.fill(); txt(x,'ร้อยละที่ตอบถูก',L+30,31,{size:18,col:'#4b5563'});
+    if(showAvg){ x.fillStyle='#1f2937'; x.fillRect(L+210,15,4,20); txt(x,'ค่าเฉลี่ยของกลุ่ม',L+224,31,{size:18,col:'#4b5563'}); }
+    [0,25,50,75,100].forEach(v=>{ const gx=L+bw*v/100, key=v===50||v===75;
+      x.strokeStyle=key?'#fb923c':'#e5e7eb'; x.setLineDash(key?[6,5]:[]); x.lineWidth=1; x.beginPath(); x.moveTo(gx,top-12); x.lineTo(gx,H-12); x.stroke(); x.setLineDash([]);
+      txt(x,v,gx,top-18,{size:15,col:key?'#c2410c':'#9ca3af',al:'center'}); });
+    items.forEach((t,i)=>{ const y=top+i*rowH;
+      txt(x,ell(x,t.k,L-34),20,y+28,{size:20,col:'#1f2937'});
+      rr(x,L,y+8,bw,24,12); x.fillStyle='#f3f4f6'; x.fill();
+      if(t.p>0){ rr(x,L,y+8,Math.max(24,bw*t.p/100),24,12); x.fillStyle=barColor(t.p); x.fill(); }
+      if(showAvg&&t.a!=null){ x.fillStyle='#1f2937'; x.fillRect(L+bw*t.a/100-2,y+3,4,34); }
+      txt(x,`${t.c}/${t.n} (${t.p}%)`,R+16,y+28,{size:20,w:700,col:'#1f2937'}); });
+  });
+}
+/* สัดส่วนคำตอบ (โดนัท) + ระดับพฤติกรรมการคิด (แท่งตั้ง) */
+function chartMix(g){
+  const W=1000,H=300, wrong=g.per.filter(p=>p.answered&&!p.ok).length, blank=g.per.filter(p=>!p.answered).length;
+  const lv=Object.entries(g.lvls).sort((a,b)=>{const i=LV_ORDER.indexOf(a[0]),j=LV_ORDER.indexOf(b[0]);return (i<0?99:i)-(j<0?99:j);});
+  return mkCanvas(W,H,x=>{
+    txt(x,'สัดส่วนคำตอบ',150,32,{size:22,w:700,col:'#c2410c',al:'center'});
+    donut(x,150,138,86,58,[{v:g.score,col:'#22c55e'},{v:wrong,col:'#ef4444'},{v:blank,col:'#9ca3af'}]);
+    txt(x,g.p+'%',150,150,{size:32,w:700,al:'center'});
+    [['ถูก',g.score,'#22c55e'],['ผิด',wrong,'#ef4444'],['ไม่ตอบ',blank,'#9ca3af']].forEach((a,i)=>{ const lx=26+i*92; x.fillStyle=a[2]; rr(x,lx,262,14,14,3); x.fill(); txt(x,`${a[0]} ${a[1]}`,lx+20,275,{size:17,col:'#4b5563'}); });
+    x.strokeStyle='#e5e7eb'; x.beginPath(); x.moveTo(320,20); x.lineTo(320,280); x.stroke();
+    txt(x,'ผลตามระดับพฤติกรรมการคิด (ร้อยละที่ตอบถูก)',660,32,{size:22,w:700,col:'#c2410c',al:'center'});
+    const n=lv.length||1, x0=350, span=620, slot=span/n, bw=Math.min(70,slot*.55), base=222, mh=140;
+    x.strokeStyle='#e5e7eb'; x.beginPath(); x.moveTo(x0,base); x.lineTo(x0+span,base); x.stroke();
+    lv.forEach(([k,v],i)=>{ const p=pct(v.c,v.n), cx=x0+slot*i+slot/2, h=mh*p/100;
+      rr(x,cx-bw/2,base-Math.max(h,3),bw,Math.max(h,3),8); x.fillStyle=barColor(p); x.fill();
+      txt(x,p+'%',cx,base-h-8,{size:19,w:700,al:'center'}); txt(x,ell(x,k,slot-6,18),cx,base+24,{size:18,al:'center'}); txt(x,`${v.c}/${v.n}`,cx,base+46,{size:16,col:'#6b7280',al:'center'}); });
+  });
+}
+/* ฮิสโตแกรมการกระจายคะแนน (รายงานกลุ่ม) */
+function chartHist(bins){
+  const W=1000,H=300, labs=['0-19','20-39','40-59','60-79','80-100'], cols=['#ef4444','#f97316','#f59e0b','#84cc16','#22c55e'], mx=Math.max(1,...bins);
+  return mkCanvas(W,H,x=>{
+    const x0=90,span=860,slot=span/5,bw=110,base=232,mh=170;
+    x.strokeStyle='#e5e7eb'; x.beginPath(); x.moveTo(x0,base); x.lineTo(x0+span,base); x.stroke();
+    txt(x,'จำนวนผู้เรียน (คน)',20,24,{size:17,col:'#6b7280'});
+    bins.forEach((b,i)=>{ const cx=x0+slot*i+slot/2, h=mh*b/mx; rr(x,cx-bw/2,base-Math.max(h,3),bw,Math.max(h,3),10); x.fillStyle=cols[i]; x.fill();
+      txt(x,b,cx,base-h-10,{size:24,w:700,al:'center'}); txt(x,labs[i],cx,base+30,{size:20,al:'center',col:'#4b5563'}); });
+    txt(x,'ช่วงคะแนน (ร้อยละ)',x0+span/2,H-10,{size:17,col:'#6b7280',al:'center'});
+  });
+}
+
+/* ===== ตัวช่วย Word: ภาพ/คำบรรยาย/แบนเนอร์ ===== */
+async function dFig(canvas,cap){
+  const D=DX(), data=await cvPng(canvas), W=canvas.width/2, H=canvas.height/2, w=600, h=Math.round(w*H/W);
+  return [ new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{before:120,after:40},keepNext:true,children:[new D.ImageRun({type:'png',data,transformation:{width:w,height:h}})]}),
+    dP(cap,{alignment:D.AlignmentType.CENTER,run:{size:28,italics:true},spacing:{after:160}}) ];
+}
+const dCap=t=>dP(t,{alignment:DX().AlignmentType.CENTER,run:{size:28,bold:true},spacing:{before:120,after:60},keepNext:true});
+function dBanner(l1,l2){
+  const D=DX(), nb={style:D.BorderStyle.NONE,size:0,color:'FFFFFF'};
+  return new D.Table({width:{size:100,type:D.WidthType.PERCENTAGE},borders:{top:nb,bottom:nb,left:nb,right:nb,insideHorizontal:nb,insideVertical:nb},
+    rows:[new D.TableRow({children:[new D.TableCell({shading:{type:D.ShadingType.CLEAR,fill:'C2410C',color:'auto'},margins:{top:140,bottom:140,left:200,right:200},
+      children:[dP(l1,{alignment:D.AlignmentType.CENTER,run:{bold:true,size:44,color:'FFFFFF'}}),dP(l2,{alignment:D.AlignmentType.CENTER,run:{size:32,color:'FFFFFF'}})]})]})]});
+}
+const dNote=t=>dP(t,{run:{size:26,color:'6B7280'},spacing:{before:60}});
+
+/* ===== รายงานผู้เรียนรายบุคคล (มีกราฟ/สถิติ/อินโฟกราฟิก) ===== */
+async function studentDocx(ex,key,sub,g,extra){
+  const {AlignmentType}=DX(); const A=adviceFor(g,sub,extra.avg); const lv=levelOf(g.p), lvT=lv[0];
   const dur = sub.startMs&&sub.endMs ? Math.max(1,Math.round((sub.endMs-sub.startMs)/60000))+' นาที' : '-';
-  const wrong=g.per.filter(p=>!p.ok); const C={alignment:AlignmentType.CENTER};
-  const ch=[ dP('รายงานผลการวิเคราะห์ผู้เรียนรายบุคคล',{...C,run:{bold:true,size:40}}),
-    dP(`${ex.title} วิชา ${ex.subj} ภาคเรียนที่ ${ex.term}`,{...C,run:{bold:true,size:36}}), dP(''),
-    dH('1. ข้อมูลผู้เรียน'),
-    dTable(['รายการ','ข้อมูล'],[['ชื่อ-สกุล',sub.name],['ชั้น / เลขที่',`${sub.cls||'-'} / ${sub.no||'-'}`],['เวลาที่ใช้',dur],['การออกจากหน้าจอสอบ',`${sub.sw||0} ครั้ง`],['สถานะการส่ง',sub.auto?'ระบบส่งอัตโนมัติ'+(sub.reason?' ('+sub.reason+')':''):'ส่งด้วยตนเอง']],[35,65]),
-    dH('2. ผลการสอบ'),
-    dTable(['คะแนน','ร้อยละ','ระดับ','ลำดับที่','ค่าเฉลี่ยกลุ่ม'],[[`${g.score}/${g.n}`,g.p,lvT,extra.rank?`${extra.rank}/${extra.total}`:'-',extra.avg!=null?extra.avg+'%':'-']],[20,20,20,20,20]),
-    dH('3. ผลการสอบรายหัวข้อ'),
-    dTable(['หัวข้อ / ตัวชี้วัด','ตอบถูก','ร้อยละ','การแปลผล'],A.T.map(t=>[t.k,`${t.c}/${t.n}`,t.p,t.p>=75?'จุดแข็ง':t.p>=50?'พอใช้':'ควรพัฒนา']),[46,18,16,20]),
-    dH('4. ผลตามระดับพฤติกรรมการคิด'),
+  const wrong=g.per.filter(p=>!p.ok); const ta=extra.topicAvg||{}; await chartFonts();
+  const diff = extra.avg!=null ? Math.round((g.p-extra.avg)*10)/10 : null;
+  const items=A.T.map(t=>({k:t.k,c:t.c,n:t.n,p:t.p,a:ta[t.k]}));
+  const ch=[ dBanner('รายงานผลการวิเคราะห์ผู้เรียนรายบุคคล',`${ex.title} วิชา ${ex.subj} ภาคเรียนที่ ${ex.term}`), dP(''),
+    ...(await dFig(chartBanner(g,extra,lv,dur),`ภาพที่ 1 สรุปผลการสอบของ ${sub.name} (อินโฟกราฟิก)`)),
+    dH('1. ข้อมูลผู้เรียนและข้อมูลการสอบ'),
+    dCap('ตารางที่ 1 ข้อมูลผู้เรียนและข้อมูลการสอบ'),
+    dTable(['รายการ','ข้อมูล'],[['ชื่อ-สกุล',sub.name],['ชั้น / เลขที่',`${sub.cls||'-'} / ${sub.no||'-'}`],['แบบทดสอบ',`${ex.title} (${ex.n||g.n} ข้อ)`],['เวลาที่ใช้',dur],['การออกจากหน้าจอสอบ',`${sub.sw||0} ครั้ง`],['สถานะการส่ง',sub.auto?'ระบบส่งอัตโนมัติ'+(sub.reason?' ('+sub.reason+')':''):'ส่งด้วยตนเอง']],[35,65]),
+    dH('2. ผลการสอบโดยรวม'),
+    dCap('ตารางที่ 2 ผลการสอบโดยรวมเทียบกับกลุ่ม'),
+    dTable(['คะแนน','ร้อยละ','ระดับ','ลำดับที่','ค่าเฉลี่ยกลุ่ม (ร้อยละ)'],[[`${g.score}/${g.n}`,g.p,lvT,extra.rank?`${extra.rank}/${extra.total}`:'-',extra.avg!=null?extra.avg:'-']],[20,15,20,20,25]),
+    dP(`ผลการสอบพบว่าผู้เรียนได้คะแนน ${g.score} จากคะแนนเต็ม ${g.n} คะแนน คิดเป็นร้อยละ ${g.p} อยู่ในระดับ “${lvT}”`+(extra.rank?` เป็นลำดับที่ ${extra.rank} จากผู้เข้าสอบทั้งสิ้น ${extra.total} คน`:'')+(diff!=null?` และ${diff>=0?'สูงกว่า':'ต่ำกว่า'}ค่าเฉลี่ยของกลุ่ม ${Math.abs(diff)} จุดร้อยละ`:'')+'',{indent:{firstLine:720},spacing:{before:100}}),
+    dH('3. ผลการสอบรายหัวข้อ / ตัวชี้วัด'),
+    ...(items.length?await dFig(chartTopics(items,extra.avg!=null&&Object.keys(ta).length>0),'ภาพที่ 2 ร้อยละที่ตอบถูกรายหัวข้อ เทียบกับค่าเฉลี่ยของกลุ่ม (เส้นประ = เกณฑ์ร้อยละ 50 และ 75)'):[]),
+    dCap('ตารางที่ 3 ผลการสอบรายหัวข้อ / ตัวชี้วัด'),
+    dTable(['หัวข้อ / ตัวชี้วัด','ตอบถูก','ร้อยละ','ค่าเฉลี่ยกลุ่ม','การแปลผล'],A.T.map(t=>[t.k,`${t.c}/${t.n}`,t.p,ta[t.k]!=null?ta[t.k]:'-',t.p>=75?'จุดแข็ง':t.p>=50?'พอใช้':'ควรพัฒนา']),[38,14,14,16,18]),
+    dH('4. สัดส่วนคำตอบและระดับพฤติกรรมการคิด'),
+    ...(await dFig(chartMix(g),'ภาพที่ 3 สัดส่วนคำตอบ และร้อยละที่ตอบถูกจำแนกตามระดับพฤติกรรมการคิด')),
+    dCap('ตารางที่ 4 ผลตามระดับพฤติกรรมการคิด'),
     dTable(['ระดับการคิด','ตอบถูก','ร้อยละ'],Object.entries(g.lvls).map(([k,v])=>[k,`${v.c}/${v.n}`,pct(v.c,v.n)]),[50,25,25]),
     dH('5. จุดแข็ง'), ...(A.strong.length?A.strong.map(t=>dP(`• ${t.k} (ร้อยละ ${t.p})`,{indent:{left:360}})):[dP('• ยังไม่มีหัวข้อที่ได้ร้อยละ 75 ขึ้นไป',{indent:{left:360}})]),
     dH('6. จุดที่ควรพัฒนา'), ...(A.weak.length?A.weak.map(t=>dP(`• ${t.k} (ร้อยละ ${t.p})`,{indent:{left:360}})):[dP('• ไม่มีหัวข้อที่ต่ำกว่าร้อยละ 50',{indent:{left:360}})]),
-    dH('7. ข้อเสนอแนะ'), ...A.adv.map((a,i)=>dP(`${i+1}. ${a}`,{indent:{left:360}})) ];
+    dH('7. สรุปผลและข้อเสนอแนะ'), ...A.adv.map((a,i)=>dP(`${i+1}. ${a}`,{indent:{left:360}})) ];
   if(wrong.length){ ch.push(dH(`8. ข้อที่ตอบผิดหรือไม่ได้ตอบ (${wrong.length} ข้อ)`),
+    dCap('ตารางที่ 5 รายการข้อที่ตอบผิดหรือไม่ได้ตอบ'),
     dTable(['ข้อ','คำถาม','คำตอบ','เฉลย / คำอธิบาย'],wrong.map(p=>[p.i+1,p.q.q,p.answered?p.q.o[p.pick]:'ไม่ได้ตอบ',p.q.o[key.key[p.i]]+(key.exp[p.i]?' — '+key.exp[p.i]:'')]),[8,40,20,32])); }
+  ch.push(dNote('หมายเหตุ: เกณฑ์การแปลผลระดับ ร้อยละ 80 ขึ้นไป = ดีเยี่ยม, 70–79 = ดี, 50–69 = พอใช้, ต่ำกว่า 50 = ควรปรับปรุง; รายหัวข้อ ร้อยละ 75 ขึ้นไป = จุดแข็ง, ต่ำกว่า 50 = ควรพัฒนา'),
+    dNote('ที่มา: ระบบคลังข้อสอบวิชาภาษาไทย โรงเรียนกระดุมทองวิทยา'));
   return [...ch, ...dSign()];
 }
-$('#anDocx').onclick=()=>{ const {r,extra}=CUR_ANA; saveDocx(studentDocx(AN.ex,AN.key,r.s,r.g,extra),'รายงานวิเคราะห์-'+r.s.name); };
-$('#aDocx').onclick=()=>{
-  if(!AN.ex) return toast('เลือกชุดข้อสอบก่อน'); const {AlignmentType}=DX(); const ex=AN.ex, C={alignment:AlignmentType.CENTER};
-  const done=AN.rows.filter(r=>r.s.status==='done'); const ps=done.map(r=>r.g.p);
+$('#anDocx').onclick=async()=>{ const {r,extra}=CUR_ANA; try{ saveDocx(await studentDocx(AN.ex,AN.key,r.s,r.g,extra),'รายงานวิเคราะห์-'+r.s.name); }catch(e){ console.error(e); toast('สร้างรายงานไม่สำเร็จ: '+e.message); } };
+
+/* ===== ภาพบันทึก 1 หน้า A4 ===== */
+function a4HTML(ex,key,sub,g,extra){
+  const [lvT,,lvC]=levelOf(g.p); const A=adviceFor(g,sub,extra.avg); const ta=extra.topicAvg||{};
+  const dur = sub.startMs&&sub.endMs ? Math.max(1,Math.round((sub.endMs-sub.startMs)/60000))+' นาที' : '-';
+  const R=34, C=2*Math.PI*R, off=C*(1-g.p/100), wrong=g.per.filter(p=>!p.ok);
+  const bar=(k,txtR,p,a)=>`<div class="a4b"><div class="a4bt"><span>${esc(k)}</span><b>${txtR}</b></div><div class="a4bb"><i style="width:${p}%;background:${barColor(p)}"></i>${a!=null?`<s style="left:${a}%"></s>`:''}</div></div>`;
+  const lv=Object.entries(g.lvls).sort((a,b)=>{const i=LV_ORDER.indexOf(a[0]),j=LV_ORDER.indexOf(b[0]);return (i<0?99:i)-(j<0?99:j);});
+  const advs=A.adv.slice(0,5);
+  return `<div class="a4h"><img src="${LOGO}" crossorigin="anonymous"><div style="flex:1"><div class="a4n">${esc(sub.name)}</div>
+      <div class="a4s">ชั้น ${esc(sub.cls||'-')} เลขที่ ${esc(sub.no||'-')}</div><div class="a4s">${esc(ex.title)} · ${esc(ex.subj)} ภาคเรียนที่ ${esc(ex.term)}</div></div>
+      <div style="position:relative;width:92px;height:92px"><svg width="92" height="92" viewBox="0 0 92 92"><circle cx="46" cy="46" r="${R}" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="11"/><circle cx="46" cy="46" r="${R}" fill="none" stroke="#fff" stroke-width="11" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 46 46)"/></svg>
+      <div class="a4r"><b>${g.score}/${g.n}</b><span>${g.p}%</span></div></div></div>
+    <div class="a4k">
+      <div><b style="color:${lvC}">${lvT}</b><span>ระดับผลการสอบ</span></div><div><b>${extra.rank?extra.rank+'/'+extra.total:'-'}</b><span>ลำดับที่ในกลุ่ม</span></div>
+      <div><b>${extra.avg!=null?extra.avg+'%':'-'}</b><span>ค่าเฉลี่ยกลุ่ม</span></div><div><b>${dur}</b><span>เวลาที่ใช้ · สลับแท็บ ${sub.sw||0}</span></div></div>
+    <div class="a4c"><div>
+      <h4>📈 ผลรายหัวข้อ <small>(เส้นดำ = ค่าเฉลี่ยกลุ่ม)</small></h4>${A.T.map(t=>bar(t.k,`${t.c}/${t.n} (${t.p}%)`,t.p,ta[t.k])).join('')}
+      <h4>🧠 ผลตามระดับการคิด</h4>${lv.map(([k,v])=>{const p=pct(v.c,v.n);return bar(k,`${v.c}/${v.n} (${p}%)`,p);}).join('')}</div>
+      <div><div class="a4x s"><h4>💪 จุดแข็ง</h4><ul>${A.strong.length?A.strong.map(t=>`<li>${esc(t.k)} (${t.p}%)</li>`).join(''):'<li>ยังไม่มีหัวข้อที่ได้ ≥ 75%</li>'}</ul></div>
+        <div class="a4x w"><h4>🎯 จุดที่ควรพัฒนา</h4><ul>${A.weak.length?A.weak.map(t=>`<li>${esc(t.k)} (${t.p}%)</li>`).join(''):'<li>ไม่มีหัวข้อที่ต่ำกว่า 50% 👍</li>'}</ul></div>
+        <div class="a4x r"><h4>💡 คำแนะนำ</h4><ul>${advs.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div></div></div>
+    ${wrong.length&&!extra.hideWrong?`<div class="a4w"><h4>❌ ข้อที่ตอบผิด/ไม่ได้ตอบ (${wrong.length} ข้อ)</h4>${wrong.slice(0,60).map(p=>`<span>${p.i+1}</span>`).join('')}${wrong.length>60?`<em>…และอีก ${wrong.length-60} ข้อ</em>`:''}</div>`:''}
+    <div class="a4f">ระบบคลังข้อสอบวิชาภาษาไทย · พัฒนาโดย ครูนนทพัทธ์ หิรัญเรือง · ${new Date().toLocaleDateString('th-TH',{dateStyle:'long'})}</div>`;
+}
+async function saveA4(){
+  const {r,extra}=CUR_ANA; toast('กำลังสร้างภาพ A4...');
+  const host=document.createElement('div'); host.className='a4p'; host.innerHTML=`<div class="a4i">${a4HTML(AN.ex,AN.key,r.s,r.g,extra)}</div>`; document.body.appendChild(host);
+  try{
+    await (document.fonts&&document.fonts.ready); await Promise.all([...host.querySelectorAll('img')].map(i=>i.decode?i.decode().catch(()=>{}):0));
+    const inner=host.firstChild; let fs=17; host.style.fontSize=fs+'px';
+    while(inner.offsetHeight>1123&&fs>7){ fs-=.5; host.style.fontSize=fs+'px'; }
+    const c=await html2canvas(host,{scale:2.5,backgroundColor:'#ffffff',useCORS:true,width:794,height:1123,windowWidth:794,windowHeight:1123});
+    const a=document.createElement('a'); a.href=c.toDataURL('image/png'); a.download='วิเคราะห์-A4-'+r.s.name+'.png'; a.click(); toast('บันทึกภาพ A4 แล้ว ✅');
+  }catch(e){ console.error(e); toast('สร้างภาพไม่สำเร็จ'); }
+  host.remove();
+}
+$('#anImg').onclick=saveA4;
+
+/* ===== บันทึกข้อความปะหน้า (ตามแบบ thai-memo-maker: TH SarabunIT๙) ===== */
+function memoChildren(m){
+  const D=DX(), F='TH SarabunIT๙', E=s=>dclean(s)||'………………………………';
+  const R=(t,o={})=>new D.TextRun({text:t,font:{ascii:F,hAnsi:F,cs:F,eastAsia:F},size:32,sizeComplexScript:32,...o,...(o.size?{sizeComplexScript:o.size}:{}),...(o.bold?{boldComplexScript:true}:{})});
+  const P=(kids,o={})=>new D.Paragraph({children:kids,spacing:{before:0,after:0,line:240,lineRule:'auto'},...o});
+  const TAB=()=>new D.TextRun({children:[new D.Tab()]});
+  const W=9026, dot=(pos)=>({type:D.TabStopType.RIGHT,position:pos,leader:D.LeaderType.DOT});
+  const SIG={left:4536}, C=D.AlignmentType.CENTER, J=D.AlignmentType.THAI_DISTRIBUTE;
+  const out=[];
+  out.push(P([ new D.ImageRun({type:'png',data:b64u8(GARUDA_B64),transformation:{width:49,height:54},floating:{horizontalPosition:{relative:D.HorizontalPositionRelativeFrom.COLUMN,offset:0},verticalPosition:{relative:D.VerticalPositionRelativeFrom.PARAGRAPH,offset:0},wrap:{type:D.TextWrappingType.NONE},behindDocument:true}}),
+    R('บันทึกข้อความ',{size:58,bold:true,characterSpacing:-20}) ],{alignment:C}));
+  out.push(P([R('ส่วนราชการ',{size:40,bold:true}),R('  '+E(m.org)),TAB()],{tabStops:[dot(W)]}));
+  out.push(P([R('ที่',{size:40,bold:true}),R('   '+E(m.no)),TAB(),TAB(),R('วันที่',{size:40,bold:true}),R(' '+E(m.date)),TAB()],{tabStops:[dot(4300),{type:D.TabStopType.LEFT,position:4500},dot(W)]}));
+  out.push(P([R('เรื่อง',{size:40,bold:true}),R('   '+E(m.subject)),TAB()],{tabStops:[dot(W)]}));
+  out.push(P([R('เรียน',{bold:true}),new D.TextRun({children:[new D.Tab()],size:32}),R(E(m.to))],{alignment:J,indent:{left:720,hanging:720},spacing:{before:120,after:0,line:240,lineRule:'auto'}}));
+  out.push(P([]));
+  (m.body.split(/\n+/).filter(Boolean)).forEach(t=>out.push(P([R(dclean(t))],{alignment:J,indent:{firstLine:720}})));
+  out.push(P([]));
+  out.push(P([R(m.closing||'จึงเรียนมาเพื่อโปรดทราบ')],{alignment:J,indent:{left:720}}));
+  for(let i=0;i<3;i++) out.push(P([],{alignment:C,indent:SIG}));
+  out.push(P([R(`(${E(m.sigName)})`)],{alignment:C,indent:SIG,keepNext:true}));
+  (m.sigPos||'').split('|').map(s=>s.trim()).filter(Boolean).forEach(l=>out.push(P([R(l)],{alignment:C,indent:SIG,keepNext:true})));
+  if(!(m.sigPos||'').trim()) out.push(P([R('………………………………')],{alignment:C,indent:SIG}));
+  (m.opinions||[]).forEach(o=>{
+    out.push(P([],{indent:SIG}));
+    out.push(P([R('ความเห็น '+E(o.role))],{indent:SIG,keepNext:true}));
+    for(let i=0;i<2;i++) out.push(P([R('.'.repeat(52))],{indent:SIG,keepNext:true}));
+    out.push(P([],{indent:SIG,keepNext:true}));
+    out.push(P([R('ลงชื่อ........................................')],{alignment:C,indent:SIG,keepNext:true}));
+    out.push(P([R(`(${E(o.name)})`)],{alignment:C,indent:SIG,keepNext:true}));
+    out.push(P([R(E(o.pos))],{alignment:C,indent:SIG})); });
+  return out;
+}
+
+/* ===== รายงานทั้งกลุ่ม (หลายชุดข้อสอบ + บันทึกข้อความปะหน้า) ===== */
+async function loadAN(ex){
+  const [k,s]=await Promise.all([getDoc(doc(db,'exams',ex.id,'private','key')),getDocs(collection(db,'exams',ex.id,'subs'))]);
+  const key=k.data(), rows=s.docs.map(d=>{const sb={id:d.id,...d.data()}; return {s:sb,g:gradeSub(ex,key,sb)};}).sort((a,b)=>b.g.score-a.g.score);
+  const done=rows.filter(r=>r.s.status==='done'); done.forEach((r,i)=>r.rank=i+1);
+  const ps=done.map(r=>r.g.p); return {ex,key,rows,done,avg:ps.length?Math.round(ps.reduce((a,b)=>a+b,0)/ps.length*10)/10:0};
+}
+async function groupChildren(A){
+  const {ex,rows,done}=A, ps=done.map(r=>r.g.p); await chartFonts();
   const tp={}; done.forEach(r=>Object.entries(r.g.topics).forEach(([k,v])=>{ tp[k]=tp[k]||{n:0,c:0}; tp[k].n+=v.n; tp[k].c+=v.c; }));
   const lv={}; done.forEach(r=>{ const l=levelOf(r.g.p)[0]; lv[l]=(lv[l]||0)+1; });
   const hard=ex.qs.map((q,i)=>({i,q,w:done.filter(r=>!r.g.per[i].ok).length})).sort((a,b)=>b.w-a.w).slice(0,10);
-  const ch=[ dP('รายงานผลการสอบและการวิเคราะห์ผู้เรียน',{...C,run:{bold:true,size:40}}),
-    dP(`${ex.title} วิชา ${ex.subj} ภาคเรียนที่ ${ex.term}`,{...C,run:{bold:true,size:36}}), dP(''),
-    dH('1. สรุปผลภาพรวม'),
-    dTable(['รายการ','ผล'],[['จำนวนข้อสอบ',ex.n+' ข้อ'],['ผู้เข้าสอบ / ส่งแล้ว',`${AN.rows.length} / ${done.length} คน`],['ค่าเฉลี่ย',AN.avg+'%'],['คะแนนสูงสุด / ต่ำสุด',ps.length?`${Math.max(...ps)}% / ${Math.min(...ps)}%`:'-'],['ผ่านเกณฑ์ร้อยละ 50',done.filter(r=>r.g.p>=50).length+' คน'],['มีการออกจากหน้าจอสอบ',AN.rows.filter(r=>(r.s.sw||0)>0).length+' คน']],[50,50]),
+  const bins=[0,0,0,0,0]; ps.forEach(p=>bins[Math.min(4,Math.floor(p/20))]++);
+  const items=Object.entries(tp).map(([k,v])=>({k,c:v.c,n:v.n,p:pct(v.c,v.n)}));
+  const ch=[ dBanner('รายงานผลการสอบและการวิเคราะห์ผู้เรียน',`${ex.title} วิชา ${ex.subj} ภาคเรียนที่ ${ex.term}`), dP(''),
+    dH('1. สรุปผลภาพรวม'), dCap('ตารางที่ 1 สรุปผลภาพรวม'),
+    dTable(['รายการ','ผล'],[['จำนวนข้อสอบ',ex.n+' ข้อ'],['ผู้เข้าสอบ / ส่งแล้ว',`${rows.length} / ${done.length} คน`],['ค่าเฉลี่ย',A.avg+'%'],['คะแนนสูงสุด / ต่ำสุด',ps.length?`${Math.max(...ps)}% / ${Math.min(...ps)}%`:'-'],['ผ่านเกณฑ์ร้อยละ 50',done.filter(r=>r.g.p>=50).length+' คน'],['มีการออกจากหน้าจอสอบ',rows.filter(r=>(r.s.sw||0)>0).length+' คน']],[50,50]),
     dH('2. จำนวนผู้เรียนจำแนกตามระดับผลการสอบ'),
+    ...(await dFig(chartHist(bins),'ภาพที่ 1 การกระจายคะแนนของผู้เรียน (ร้อยละ)')),
+    dCap('ตารางที่ 2 จำนวนผู้เรียนจำแนกตามระดับผลการสอบ'),
     dTable(['ระดับ','จำนวน (คน)','ร้อยละ'],['ดีเยี่ยม','ดี','พอใช้','ควรปรับปรุง'].map(l=>[l,lv[l]||0,pct(lv[l]||0,done.length)]),[50,25,25]),
     dH('3. ผลการสอบรายหัวข้อ (ทั้งกลุ่ม)'),
-    dTable(['หัวข้อ / ตัวชี้วัด','ร้อยละที่ตอบถูก','การแปลผล'],Object.entries(tp).map(([k,v])=>{const p=pct(v.c,v.n);return [k,p,p>=75?'จุดแข็งของกลุ่ม':p>=50?'พอใช้':'ควรสอนซ่อมเสริม'];}),[50,25,25]),
-    dH('4. ข้อสอบที่ผู้เรียนตอบผิดมากที่สุด'),
+    ...(items.length?await dFig(chartTopics(items,false),'ภาพที่ 2 ร้อยละที่ตอบถูกรายหัวข้อของทั้งกลุ่ม'):[]),
+    dCap('ตารางที่ 3 ผลการสอบรายหัวข้อ'),
+    dTable(['หัวข้อ / ตัวชี้วัด','ร้อยละที่ตอบถูก','การแปลผล'],items.map(t=>[t.k,t.p,t.p>=75?'จุดแข็งของกลุ่ม':t.p>=50?'พอใช้':'ควรสอนซ่อมเสริม']),[50,25,25]),
+    dH('4. ข้อสอบที่ผู้เรียนตอบผิดมากที่สุด'), dCap('ตารางที่ 4 ข้อสอบที่ตอบผิดมากที่สุด 10 อันดับแรก'),
     dTable(['ข้อ','คำถาม','หัวข้อ','ตอบผิด (คน)'],hard.map(x=>[x.i+1,x.q.q,x.q.tp,`${x.w}/${done.length}`]),[8,57,20,15]),
-    dH('5. ผลการสอบรายบุคคล'),
-    dTable(['ลำดับ','ชื่อ-สกุล','ชั้น/เลขที่','คะแนน','ร้อยละ','ระดับ','ออกจากจอ'],AN.rows.map(r=>[r.rank||'-',r.s.name,`${r.s.cls}/${r.s.no}`,`${r.g.score}/${r.g.n}`,r.g.p,r.s.status==='done'?levelOf(r.g.p)[0]:'ยังไม่ส่ง',r.s.sw||0]),[9,31,14,12,10,14,10]),
+    dH('5. ผลการสอบรายบุคคล'), dCap('ตารางที่ 5 ผลการสอบรายบุคคล'),
+    dTable(['ลำดับ','ชื่อ-สกุล','ชั้น/เลขที่','คะแนน','ร้อยละ','ระดับ','ออกจากจอ'],rows.map(r=>[r.rank||'-',r.s.name,`${r.s.cls}/${r.s.no}`,`${r.g.score}/${r.g.n}`,r.g.p,r.s.status==='done'?levelOf(r.g.p)[0]:'ยังไม่ส่ง',r.s.sw||0]),[9,31,14,12,10,14,10]),
+    dNote('หมายเหตุ: เกณฑ์การแปลผลระดับ ร้อยละ 80 ขึ้นไป = ดีเยี่ยม, 70–79 = ดี, 50–69 = พอใช้, ต่ำกว่า 50 = ควรปรับปรุง'),
     ...dSign() ];
-  saveDocx(ch,'รายงานผลสอบ-'+ex.title);
+  return ch;
+}
+
+/* ===== หน้าต่างเลือกชุดรายงาน + ฟอร์มบันทึกข้อความ ===== */
+const RP_KEY='rpt_memo_v1', RPF=['rpOrg','rpNo','rpTo','rpSigN','rpSigP','rpOp','rpClose'];
+function rpSel(){ return $$('.rpc:checked').map(c=>EXAMS.find(x=>x.id===c.value)).filter(Boolean); }
+function rpRefresh(){
+  const ex=rpSel(); const list=ex.map((e,i)=>`${ex.length>1?(i+1)+') ':''}${e.title} วิชา ${e.subj} ภาคเรียนที่ ${e.term}`).join(' ');
+  if(!$('#rpSub').dataset.dirty) $('#rpSub').value='ขอส่งรายงานผลการสอบและการวิเคราะห์ผู้เรียน'+(ex.length===1?' '+ex[0].title:ex.length>1?` จำนวน ${ex.length} ชุด`:'');
+  if(!$('#rpBody').dataset.dirty) $('#rpBody').value=ex.length?`ด้วยข้าพเจ้าได้ดำเนินการทดสอบและวิเคราะห์ผลสัมฤทธิ์ทางการเรียนของผู้เรียน จำนวน ${ex.length} ชุด ได้แก่ ${list} บัดนี้ได้จัดทำรายงานผลการสอบและการวิเคราะห์ผู้เรียนเสร็จเรียบร้อยแล้ว รายละเอียดปรากฏตามเอกสารที่แนบมาพร้อมบันทึกข้อความนี้`:'';
+  $('#rpCnt').textContent=ex.length?`เลือกแล้ว ${ex.length} ชุด`:'ยังไม่ได้เลือก';
+}
+async function rpOpen(){
+  if(!EXAMS.length) await loadExams();
+  $('#rpList').innerHTML=EXAMS.map(x=>`<label style="display:block;padding:4px 0"><input type="checkbox" class="rpc" value="${x.id}"> ${esc(x.title)} · ${esc(x.subj||'')}</label>`).join('')||'<span class="muted">ยังไม่มีชุดข้อสอบ</span>';
+  const cur=$('#aExam').value; $$('.rpc').forEach(c=>{ c.checked=c.value===cur; c.onchange=()=>{ $('#rpAll').checked=$$('.rpc').every(z=>z.checked); rpRefresh(); }; });
+  $('#rpAll').checked=false; let sv={}; try{ sv=JSON.parse(localStorage.getItem(RP_KEY)||'{}'); }catch(e){}
+  RPF.forEach(id=>{ $('#'+id).value=sv[id]||''; });
+  if(!$('#rpClose').value) $('#rpClose').value='จึงเรียนมาเพื่อโปรดทราบ';
+  $('#rpDate').value=new Date().toLocaleDateString('th-TH-u-nu-thai',{day:'numeric',month:'long',year:'numeric'});
+  $('#rpSub').dataset.dirty=''; $('#rpBody').dataset.dirty=''; rpRefresh(); toggleMemo(); openM('mRpt');
+}
+function toggleMemo(){ $('#rpForm').style.display=$('#rpMemo').checked?'':'none'; }
+$('#rpMemo').onchange=toggleMemo; $('#rpSub').oninput=e=>e.target.dataset.dirty='1'; $('#rpBody').oninput=e=>e.target.dataset.dirty='1';
+$('#rpAll').onchange=e=>{ $$('.rpc').forEach(c=>c.checked=e.target.checked); rpRefresh(); };
+$('#aDocx').onclick=rpOpen;
+$('#rpGo').onclick=async()=>{
+  const exs=rpSel(); if(!exs.length) return toast('กรุณาเลือกชุดข้อสอบอย่างน้อย 1 ชุด');
+  const memoOn=$('#rpMemo').checked, v=id=>$('#'+id).value.trim();
+  const m={org:v('rpOrg'),no:v('rpNo'),date:v('rpDate'),subject:v('rpSub'),to:v('rpTo'),body:$('#rpBody').value.trim(),closing:v('rpClose'),sigName:v('rpSigN'),sigPos:v('rpSigP'),
+    opinions:v('rpOp').split('\n').map(l=>l.split('|').map(s=>s.trim())).filter(a=>a[0]||a[1]).map(a=>({role:a[0],name:a[1],pos:a[2]}))};
+  if(memoOn&&(!m.org||!m.to||!m.sigName)&&!await confirmBox('ช่องสำคัญของบันทึกข้อความ (ส่วนราชการ / เรียน / ผู้ลงนาม) ยังว่าง จะเว้นเป็น ………… ให้กรอกด้วยมือภายหลัง ต้องการสร้างต่อหรือไม่?')) return;
+  const sv={}; RPF.forEach(id=>sv[id]=v(id)); try{ localStorage.setItem(RP_KEY,JSON.stringify(sv)); }catch(e){}
+  const btn=$('#rpGo'); btn.disabled=true; btn.textContent='กำลังสร้างรายงาน...';
+  try{
+    const secs=[]; if(memoOn) secs.push({margin:{top:709,right:1440,bottom:1135,left:1440},children:memoChildren(m)});
+    for(const ex of exs){ btn.textContent=`กำลังประมวลผล: ${ex.title}`; const A=await loadAN(ex); secs.push({children:await groupChildren(A)}); }
+    await saveDocx(null, exs.length>1?`รายงานผลสอบ-${exs.length}ชุด`:'รายงานผลสอบ-'+exs[0].title, {sections:secs});
+    $('#mRpt').classList.remove('on');
+  }catch(e){ console.error(e); toast('สร้างรายงานไม่สำเร็จ: '+(e.code||e.message)); }
+  btn.disabled=false; btn.textContent='📄 สร้างรายงาน .docx';
 };
+
 
 /* =======================================================================
    STUDENT
