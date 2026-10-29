@@ -1686,7 +1686,7 @@ function chartBanner(g,extra,lv,dur){
 function chartTopics(items,showAvg){
   const W=1000,rowH=54,top=74,H=top+items.length*rowH+16;
   return mkCanvas(W,H,x=>{
-    const L=310,R=850,bw=R-L;
+    const L=310,R=items.some(t=>t.lab)?690:850,bw=R-L;
     rr(x,L,18,22,14,4); x.fillStyle='#22c55e'; x.fill(); txt(x,'ร้อยละที่ตอบถูก',L+30,31,{size:18,col:'#4b5563'});
     if(showAvg){ x.fillStyle='#1f2937'; x.fillRect(L+210,15,4,20); txt(x,'ค่าเฉลี่ยของกลุ่ม',L+224,31,{size:18,col:'#4b5563'}); }
     [0,25,50,75,100].forEach(v=>{ const gx=L+bw*v/100, key=v===50||v===75;
@@ -1697,7 +1697,7 @@ function chartTopics(items,showAvg){
       rr(x,L,y+8,bw,24,12); x.fillStyle='#f3f4f6'; x.fill();
       if(t.p>0){ rr(x,L,y+8,Math.max(24,bw*t.p/100),24,12); x.fillStyle=barColor(t.p); x.fill(); }
       if(showAvg&&t.a!=null){ x.fillStyle='#1f2937'; x.fillRect(L+bw*t.a/100-2,y+3,4,34); }
-      txt(x,`${t.c}/${t.n} (${t.p}%)`,R+16,y+28,{size:20,w:700,col:'#1f2937'}); });
+      txt(x,t.lab||`${t.c}/${t.n} (${t.p}%)`,R+16,y+28,{size:20,w:700,col:'#1f2937'}); });
   });
 }
 /* สัดส่วนคำตอบ (โดนัท) + ระดับพฤติกรรมการคิด (แท่งตั้ง) */
@@ -1881,7 +1881,8 @@ async function groupChildren(A){
   const lv={}; done.forEach(r=>{ const l=levelOf(r.g.p)[0]; lv[l]=(lv[l]||0)+1; });
   const hard=ex.qs.map((q,i)=>({i,q,w:done.filter(r=>!r.g.per[i].ok).length})).sort((a,b)=>b.w-a.w).slice(0,10);
   const bins=[0,0,0,0,0]; ps.forEach(p=>bins[Math.min(4,Math.floor(p/20))]++);
-  const items=Object.entries(tp).map(([k,v])=>({k,c:v.c,n:v.n,p:pct(v.c,v.n)}));
+  const kk=done.length||1, f1=v=>String(Math.round(v*10)/10);
+  const items=Object.entries(tp).map(([k,v])=>({k,c:v.c,n:v.n,p:pct(v.c,v.n),avgC:f1(v.c/kk),avgN:f1(v.n/kk),lab:`${pct(v.c,v.n)}% (เฉลี่ย ${f1(v.c/kk)}/${f1(v.n/kk)} ข้อ)`}));
   const ch=[ dBanner('รายงานผลการสอบและการวิเคราะห์ผู้เรียน',`${ex.title} วิชา ${ex.subj} ภาคเรียนที่ ${ex.term}`), dP(''),
     dH('1. สรุปผลภาพรวม'), dCap('ตารางที่ 1 สรุปผลภาพรวม'),
     dTable(['รายการ','ผล'],[['จำนวนข้อสอบ',ex.n+' ข้อ'],['ผู้เข้าสอบ / ส่งแล้ว',`${rows.length} / ${done.length} คน`],['ค่าเฉลี่ย',A.avg+'%'],['คะแนนสูงสุด / ต่ำสุด',ps.length?`${Math.max(...ps)}% / ${Math.min(...ps)}%`:'-'],['ผ่านเกณฑ์ร้อยละ 50',done.filter(r=>r.g.p>=50).length+' คน'],['มีการออกจากหน้าจอสอบ',rows.filter(r=>(r.s.sw||0)>0).length+' คน']],[50,50]),
@@ -1892,7 +1893,8 @@ async function groupChildren(A){
     dH('3. ผลการสอบรายหัวข้อ (ทั้งกลุ่ม)'),
     ...(items.length?await dFig(chartTopics(items,false),'ภาพที่ 2 ร้อยละที่ตอบถูกรายหัวข้อของทั้งกลุ่ม'):[]),
     dCap('ตารางที่ 3 ผลการสอบรายหัวข้อ'),
-    dTable(['หัวข้อ / ตัวชี้วัด','ร้อยละที่ตอบถูก','การแปลผล'],items.map(t=>[t.k,t.p,t.p>=75?'จุดแข็งของกลุ่ม':t.p>=50?'พอใช้':'ควรสอนซ่อมเสริม']),[50,25,25]),
+    dTable(['หัวข้อ / ตัวชี้วัด','ร้อยละที่ตอบถูก','ตอบถูกเฉลี่ยต่อคน (ข้อ)','การแปลผล'],items.map(t=>[t.k,t.p,`${t.avgC} จาก ${t.avgN}`,t.p>=75?'จุดแข็งของกลุ่ม':t.p>=50?'พอใช้':'ควรสอนซ่อมเสริม']),[34,16,26,24]),
+    dNote('หมายเหตุ: ร้อยละคำนวณจากจำนวนครั้งที่ตอบถูกของผู้เรียนทุกคนรวมกัน ต่อจำนวนครั้งที่ตอบทั้งหมดในหัวข้อนั้น (จำนวนข้อ × จำนวนผู้เรียน) จึงแสดงค่าเฉลี่ยต่อคนเพื่อเทียบกับจำนวนข้อจริง'),
     dH('4. ข้อสอบที่ผู้เรียนตอบผิดมากที่สุด'), dCap('ตารางที่ 4 ข้อสอบที่ตอบผิดมากที่สุด 10 อันดับแรก'),
     dTable(['ข้อ','คำถาม','หัวข้อ','ตอบผิด (คน)'],hard.map(x=>[x.i+1,x.q.q,x.q.tp,`${x.w}/${done.length}`]),[8,57,20,15]),
     dH('5. ผลการสอบรายบุคคล'), dCap('ตารางที่ 5 ผลการสอบรายบุคคล'),
