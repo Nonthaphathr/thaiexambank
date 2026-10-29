@@ -549,7 +549,7 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
   <div id="rpForm" style="margin-top:8px">
     <div class="grid g2">
       <div class="field"><label class="sm muted">ส่วนราชการ</label><input id="rpOrg" list="rpOrgL" placeholder="เช่น กลุ่มสาระการเรียนรู้ภาษาไทย โรงเรียนกระดุมทองวิทยา ..."></div>
-      <div class="field"><label class="sm muted">ที่ (เว้นว่างได้ — จะเป็นจุดไข่ปลาให้กรอกมือ)</label><input id="rpNo" placeholder="ศก 51008.08/............"></div>
+      <div class="field"><label class="sm muted">ที่ (เติมเลขหลัง / ได้เลย)</label><input id="rpNo" placeholder="ศก 51008.08/"></div>
       <div class="field"><label class="sm muted">วันที่</label><input id="rpDate"></div>
       <div class="field"><label class="sm muted">เรียน</label><input id="rpTo" list="rpToL" placeholder="ผู้อำนวยการโรงเรียน..."></div>
     </div>
@@ -560,7 +560,7 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
       <div class="field"><label class="sm muted">ผู้ลงนาม (ชื่อ-สกุล)</label><input id="rpSigN" list="rpSigL" placeholder="เช่น นายนนทพัทธ์ หิรัญเรือง"></div>
     </div>
     <div class="field"><label class="sm muted">ตำแหน่งผู้ลงนาม (ใช้ | คั่นเพื่อขึ้นบรรทัดใหม่)</label><input id="rpSigP" placeholder="ครู|หัวหน้ากลุ่มสาระการเรียนรู้ภาษาไทย"></div>
-    <div class="field"><label class="sm muted">ความเห็นผู้บังคับบัญชา (ไม่บังคับ — 1 บรรทัดต่อ 1 คน: ตำแหน่งที่ให้ความเห็น | ชื่อ-สกุล | ตำแหน่ง)</label><textarea id="rpOp" rows="3" placeholder="หัวหน้ากลุ่มบริหารงานวิชาการ | ชื่อ-สกุล | หัวหน้ากลุ่มบริหารงานวิชาการ"></textarea></div>
+    <div class="field"><label class="sm muted">ความเห็น/ผู้ลงนามต่อ ตามลำดับ (1 บรรทัดต่อ 1 คน: ตำแหน่งที่ให้ความเห็น | ชื่อ-สกุล | ตำแหน่ง — ลบทั้งหมดถ้าไม่ต้องการ)</label><textarea id="rpOp" rows="3" placeholder="หัวหน้ากลุ่มบริหารงานวิชาการ | ชื่อ-สกุล | หัวหน้ากลุ่มบริหารงานวิชาการ"></textarea></div>
     <datalist id="rpOrgL"><option value="กลุ่มสาระการเรียนรู้ภาษาไทย โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ"><option value="กลุ่มบริหารงานวิชาการ โรงเรียนกระดุมทองวิทยา อำเภอกันทรารมย์ จังหวัดศรีสะเกษ"></datalist>
     <datalist id="rpToL"><option value="ผู้อำนวยการโรงเรียนกระดุมทองวิทยา"></datalist>
     <datalist id="rpSigL"><option value="นายนนทพัทธ์ หิรัญเรือง"></datalist>
@@ -1831,9 +1831,9 @@ function memoChildren(m){
   const out=[];
   out.push(P([ new D.ImageRun({type:'png',data:b64u8(GARUDA_B64),transformation:{width:49,height:54},floating:{horizontalPosition:{relative:D.HorizontalPositionRelativeFrom.COLUMN,offset:0},verticalPosition:{relative:D.VerticalPositionRelativeFrom.PARAGRAPH,offset:0},wrap:{type:D.TextWrappingType.NONE},behindDocument:true}}),
     R('บันทึกข้อความ',{size:58,bold:true,characterSpacing:-20}) ],{alignment:C}));
-  out.push(P([R('ส่วนราชการ',{size:40,bold:true}),R('  '+E(m.org)),TAB()],{tabStops:[dot(W)]}));
-  out.push(P([R('ที่',{size:40,bold:true}),R('   '+E(m.no)),TAB(),TAB(),R('วันที่',{size:40,bold:true}),R(' '+E(m.date)),TAB()],{tabStops:[dot(4300),{type:D.TabStopType.LEFT,position:4500},dot(W)]}));
-  out.push(P([R('เรื่อง',{size:40,bold:true}),R('   '+E(m.subject)),TAB()],{tabStops:[dot(W)]}));
+  out.push(P([R('ส่วนราชการ',{size:40,bold:true}),R('  '+E(m.org))]));
+  out.push(P([R('ที่',{size:40,bold:true}),R('   '+(dclean(m.no)||'ศก 51008.08/............')),TAB(),R('วันที่',{size:40,bold:true}),R(' '+E(m.date))],{tabStops:[{type:D.TabStopType.LEFT,position:4500}]}));
+  out.push(P([R('เรื่อง',{size:40,bold:true}),R('   '+E(m.subject))]));
   out.push(P([R('เรียน',{bold:true}),new D.TextRun({children:[new D.Tab()],size:32}),R(E(m.to))],{alignment:J,indent:{left:720,hanging:720},spacing:{before:120,after:0,line:240,lineRule:'auto'}}));
   out.push(P([]));
   (m.body.split(/\n+/).filter(Boolean)).forEach(t=>out.push(P([R(dclean(t))],{alignment:J,indent:{firstLine:720}})));
@@ -1846,7 +1846,7 @@ function memoChildren(m){
   (m.opinions||[]).forEach(o=>{
     out.push(P([],{indent:SIG}));
     out.push(P([R('ความเห็น '+E(o.role))],{indent:SIG,keepNext:true}));
-    for(let i=0;i<2;i++) out.push(P([R('.'.repeat(52))],{indent:SIG,keepNext:true}));
+    for(let i=0;i<2;i++) out.push(P([R('.'.repeat(46))],{indent:SIG,keepNext:true}));
     out.push(P([],{indent:SIG,keepNext:true}));
     out.push(P([R('ลงชื่อ........................................')],{alignment:C,indent:SIG,keepNext:true}));
     out.push(P([R(`(${E(o.name)})`)],{alignment:C,indent:SIG,keepNext:true}));
@@ -1889,6 +1889,7 @@ async function groupChildren(A){
 }
 
 /* ===== หน้าต่างเลือกชุดรายงาน + ฟอร์มบันทึกข้อความ ===== */
+const RP_OP_DEFAULT='หัวหน้ากลุ่มบริหารงานวิชาการ | นางสาวสุพัฒตา ศรีเมือง | หัวหน้ากลุ่มบริหารงานวิชาการ\nรองผู้อำนวยการโรงเรียน | นางสุคันทร บาอินทร์ | รองผู้อำนวยการโรงเรียน\nผู้อำนวยการโรงเรียน | นางสุนิสา ใจใหญ่ | ผู้อำนวยการโรงเรียนกระดุมทองวิทยา';
 const RP_KEY='rpt_memo_v1', RPF=['rpOrg','rpNo','rpTo','rpSigN','rpSigP','rpOp','rpClose'];
 function rpSel(){ return $$('.rpc:checked').map(c=>EXAMS.find(x=>x.id===c.value)).filter(Boolean); }
 function rpRefresh(){
@@ -1903,6 +1904,8 @@ async function rpOpen(){
   const cur=$('#aExam').value; $$('.rpc').forEach(c=>{ c.checked=c.value===cur; c.onchange=()=>{ $('#rpAll').checked=$$('.rpc').every(z=>z.checked); rpRefresh(); }; });
   $('#rpAll').checked=false; let sv={}; try{ sv=JSON.parse(localStorage.getItem(RP_KEY)||'{}'); }catch(e){}
   RPF.forEach(id=>{ $('#'+id).value=sv[id]||''; });
+  if(!$('#rpOp').value) $('#rpOp').value=RP_OP_DEFAULT;
+  if(!$('#rpNo').value.trim()) $('#rpNo').value='ศก 51008.08/';
   if(!$('#rpClose').value) $('#rpClose').value='จึงเรียนมาเพื่อโปรดทราบ';
   $('#rpDate').value=new Date().toLocaleDateString('th-TH-u-nu-thai',{day:'numeric',month:'long',year:'numeric'});
   $('#rpSub').dataset.dirty=''; $('#rpBody').dataset.dirty=''; rpRefresh(); toggleMemo(); openM('mRpt');
