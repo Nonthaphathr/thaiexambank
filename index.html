@@ -1837,11 +1837,11 @@ function memoChildren(m){
     R('บันทึกข้อความ',{size:58,bold:true,characterSpacing:-20}) ],{alignment:C}));
   /* หัวข้อตัวหนาไม่มีเส้นประใต้ — เส้นประอยู่ใต้ค่าที่กรอกเท่านั้น */
   const lab=(t,w)=>cellT([P([R(t,{size:40,bold:true})])],w);
-  const val=(t,w,gap)=>new D.TableCell({width:{size:w,type:D.WidthType.DXA},borders:{...NBS,bottom:DOT.bottom},verticalAlign:D.VerticalAlign.BOTTOM,margins:{top:0,bottom:0,left:100,right:gap||0},children:[P([R(t,{size:VS})])]});
+  const val=(t,w,gap)=>new D.TableCell({width:{size:w,type:D.WidthType.DXA},borders:{...NBS,bottom:DOT.bottom},verticalAlign:D.VerticalAlign.BOTTOM,margins:{top:0,bottom:0,left:60,right:gap||0},children:[P([R(t,{size:VS})])]});
   const gapC=w=>cellT([P([])],w);
-  out.push(tbl([[lab('ส่วนราชการ',1750),val(E(m.org),7276)]],[1750,7276]));
-  out.push(tbl([[lab('ที่',450),val(dclean(m.no)||'ศก 51008.08/............',3900),gapC(200),lab('วันที่',760),val(E(m.date),3716)]],[450,3900,200,760,3716]));
-  out.push(tbl([[lab('เรื่อง',800),val(E(m.subject),8226)]],[800,8226]));
+  out.push(tbl([[lab('ส่วนราชการ',1420),val(E(m.org),7606)]],[1420,7606]));
+  out.push(tbl([[lab('ที่',360),val(dclean(m.no)||'ศก 51008.08/............',3940),gapC(200),lab('วันที่',620),val(E(m.date),3906)]],[360,3940,200,620,3906]));
+  out.push(tbl([[lab('เรื่อง',640),val(E(m.subject),8386)]],[640,8386]));
   out.push(P([R('เรียน',{bold:true}),new D.TextRun({children:[new D.Tab()],size:32}),R(E(m.to),{size:VS})],{alignment:J,indent:{left:720,hanging:720},spacing:{before:120,after:0,line:240,lineRule:'auto'}}));
   out.push(P([]));
   (m.body.split(/\n+/).filter(Boolean)).forEach(t=>out.push(P([R(dclean(t))],{alignment:J,indent:{firstLine:720}})));
