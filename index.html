@@ -544,6 +544,8 @@ input[type=checkbox]{width:auto;accent-color:var(--or)}
   <h4 style="margin:10px 0 4px">1) เลือกชุดข้อสอบที่ต้องการออกรายงาน <span class="muted sm" id="rpCnt"></span></h4>
   <div><label><input type="checkbox" id="rpAll"> เลือกทั้งหมด</label></div>
   <div id="rpList" class="clist" style="max-height:200px;overflow:auto"></div>
+  <h4 style="margin:12px 0 4px">ลำดับเอกสารในไฟล์ <span class="muted sm">(ใช้ ▲ ▼ เลื่อนลำดับ — ชุดแรกจะอยู่หน้าแรกหลังบันทึกข้อความ)</span></h4>
+  <div id="rpOrder" class="clist"></div>
   <h4 style="margin:14px 0 4px">2) บันทึกข้อความปะหน้ารายงาน</h4>
   <label><input type="checkbox" id="rpMemo" checked> แนบบันทึกข้อความปะหน้าก่อนตารางรายงาน (แบบ TH SarabunIT๙)</label>
   <div id="rpForm" style="margin-top:8px">
@@ -1907,17 +1909,24 @@ async function groupChildren(A){
 /* ===== หน้าต่างเลือกชุดรายงาน + ฟอร์มบันทึกข้อความ ===== */
 const RP_OP_DEFAULT='หัวหน้ากลุ่มบริหารงานวิชาการ | นางสาวสุพัฒตา ศรีเมือง | หัวหน้ากลุ่มบริหารงานวิชาการ\nรองผู้อำนวยการโรงเรียน | นางสุคันทร บาอินทร์ | รองผู้อำนวยการโรงเรียน\nผู้อำนวยการโรงเรียน | นางสุนิสา ใจใหญ่ | ผู้อำนวยการโรงเรียนกระดุมทองวิทยา';
 const RP_KEY='rpt_memo_v1', RPF=['rpOrg','rpNo','rpTo','rpSigN','rpSigP','rpOp','rpClose'];
-function rpSel(){ return $$('.rpc:checked').map(c=>EXAMS.find(x=>x.id===c.value)).filter(Boolean); }
+let RP_ORDER=[];
+function rpSel(){ return RP_ORDER.map(id=>EXAMS.find(x=>x.id===id)).filter(Boolean); }
+function rpOrderRender(){
+  const L=rpSel(); const box=$('#rpOrder');
+  box.innerHTML=L.length?L.map((e,i)=>`<div class="row" style="padding:3px 0;align-items:center"><span class="grow">${i+1}. ${esc(e.title)} · ${esc(e.subj||'')}</span><button class="btn gho xs" data-mv="${i}" data-d="-1" ${i===0?'disabled':''}>▲</button><button class="btn gho xs" data-mv="${i}" data-d="1" ${i===L.length-1?'disabled':''}>▼</button></div>`).join(''):'<span class="muted sm">ยังไม่ได้เลือกชุดข้อสอบ</span>';
+  $$('#rpOrder [data-mv]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.mv, j=i+(+b.dataset.d); if(j<0||j>=RP_ORDER.length) return; [RP_ORDER[i],RP_ORDER[j]]=[RP_ORDER[j],RP_ORDER[i]]; rpRefresh(); });
+}
 function rpRefresh(){
   const ex=rpSel(); const list=ex.map((e,i)=>`${ex.length>1?(i+1)+') ':''}${e.title} วิชา ${e.subj} ภาคเรียนที่ ${e.term}`).join(' ');
   if(!$('#rpSub').dataset.dirty) $('#rpSub').value='ขอส่งรายงานผลการสอบและการวิเคราะห์ผู้เรียน'+(ex.length===1?' '+ex[0].title:ex.length>1?` จำนวน ${ex.length} ชุด`:'');
   if(!$('#rpBody').dataset.dirty) $('#rpBody').value=ex.length?`ด้วยข้าพเจ้าได้ดำเนินการทดสอบและวิเคราะห์ผลสัมฤทธิ์ทางการเรียนของผู้เรียน จำนวน ${ex.length} ชุด ได้แก่ ${list} บัดนี้ได้จัดทำรายงานผลการสอบและการวิเคราะห์ผู้เรียนเสร็จเรียบร้อยแล้ว รายละเอียดปรากฏตามเอกสารที่แนบมาพร้อมบันทึกข้อความนี้`:'';
-  $('#rpCnt').textContent=ex.length?`เลือกแล้ว ${ex.length} ชุด`:'ยังไม่ได้เลือก';
+  $('#rpCnt').textContent=ex.length?`เลือกแล้ว ${ex.length} ชุด`:'ยังไม่ได้เลือก'; rpOrderRender();
 }
 async function rpOpen(){
   if(!EXAMS.length) await loadExams();
   $('#rpList').innerHTML=EXAMS.map(x=>`<label style="display:block;padding:4px 0"><input type="checkbox" class="rpc" value="${x.id}"> ${esc(x.title)} · ${esc(x.subj||'')}</label>`).join('')||'<span class="muted">ยังไม่มีชุดข้อสอบ</span>';
-  const cur=$('#aExam').value; $$('.rpc').forEach(c=>{ c.checked=c.value===cur; c.onchange=()=>{ $('#rpAll').checked=$$('.rpc').every(z=>z.checked); rpRefresh(); }; });
+  const cur=$('#aExam').value; RP_ORDER=cur&&EXAMS.some(x=>x.id===cur)?[cur]:[];
+  $$('.rpc').forEach(c=>{ c.checked=c.value===cur; c.onchange=()=>{ if(c.checked){ if(!RP_ORDER.includes(c.value)) RP_ORDER.push(c.value); } else RP_ORDER=RP_ORDER.filter(id=>id!==c.value); $('#rpAll').checked=$$('.rpc').every(z=>z.checked); rpRefresh(); }; });
   $('#rpAll').checked=false; let sv={}; try{ sv=JSON.parse(localStorage.getItem(RP_KEY)||'{}'); }catch(e){}
   RPF.forEach(id=>{ $('#'+id).value=sv[id]||''; });
   if(!$('#rpOp').value) $('#rpOp').value=RP_OP_DEFAULT;
@@ -1928,7 +1937,7 @@ async function rpOpen(){
 }
 function toggleMemo(){ $('#rpForm').style.display=$('#rpMemo').checked?'':'none'; }
 $('#rpMemo').onchange=toggleMemo; $('#rpSub').oninput=e=>e.target.dataset.dirty='1'; $('#rpBody').oninput=e=>e.target.dataset.dirty='1';
-$('#rpAll').onchange=e=>{ $$('.rpc').forEach(c=>c.checked=e.target.checked); rpRefresh(); };
+$('#rpAll').onchange=e=>{ $$('.rpc').forEach(c=>c.checked=e.target.checked); RP_ORDER=e.target.checked?$$('.rpc').map(c=>c.value):[]; rpRefresh(); };
 $('#aDocx').onclick=rpOpen;
 $('#rpGo').onclick=async()=>{
   const exs=rpSel(); if(!exs.length) return toast('กรุณาเลือกชุดข้อสอบอย่างน้อย 1 ชุด');
