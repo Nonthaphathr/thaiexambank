@@ -1856,7 +1856,7 @@ function memoChildren(m){
   /* ความเห็น: เรียงสองคอลัมน์ต่อแถว คนสุดท้ายถ้าเหลือเดี่ยวอยู่กึ่งกลาง */
   const op=m.opinions||[];
   const block=(o,al)=>[
-    P([R('ความเห็น '+E(o.role))],{alignment:al,keepNext:true,spacing:{before:160,after:0,line:240,lineRule:'auto'}}),
+    P([R('ความเห็น '+E(o.role),{bold:true})],{alignment:al,keepNext:true,spacing:{before:160,after:0,line:240,lineRule:'auto'}}),
     P([],{border:DOT,keepNext:true,spacing:{before:240,after:0,line:240,lineRule:'auto'}}),
     P([],{keepNext:true}),
     P([R('ลงชื่อ'+'.'.repeat(al===C?36:30))],{alignment:al,keepNext:true,indent:al===C?undefined:{left:240}}),
@@ -1907,7 +1907,7 @@ async function groupChildren(A){
 }
 
 /* ===== หน้าต่างเลือกชุดรายงาน + ฟอร์มบันทึกข้อความ ===== */
-const RP_OP_DEFAULT='หัวหน้ากลุ่มบริหารงานวิชาการ | นางสาวสุพัฒตา ศรีเมือง | หัวหน้ากลุ่มบริหารงานวิชาการ\nรองผู้อำนวยการโรงเรียน | นางสุคันทร บาอินทร์ | รองผู้อำนวยการโรงเรียน\nผู้อำนวยการโรงเรียน | นางสุนิสา ใจใหญ่ | ผู้อำนวยการโรงเรียนกระดุมทองวิทยา';
+const RP_OP_DEFAULT='หัวหน้ากลุ่มบริหารงานวิชาการ | นางสาวสุพัฒตา ศรีเมือง | หัวหน้ากลุ่มบริหารงานวิชาการ\nรองผู้อำนวยการโรงเรียน | นางสุคันทร บาอินทร์ | รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา\nผู้อำนวยการโรงเรียน | นางสุนิสา ใจใหญ่ | ผู้อำนวยการโรงเรียนกระดุมทองวิทยา';
 const RP_KEY='rpt_memo_v1', RPF=['rpOrg','rpNo','rpTo','rpSigN','rpSigP','rpOp','rpClose'];
 let RP_ORDER=[];
 function rpSel(){ return RP_ORDER.map(id=>EXAMS.find(x=>x.id===id)).filter(Boolean); }
@@ -1929,6 +1929,7 @@ async function rpOpen(){
   $$('.rpc').forEach(c=>{ c.checked=c.value===cur; c.onchange=()=>{ if(c.checked){ if(!RP_ORDER.includes(c.value)) RP_ORDER.push(c.value); } else RP_ORDER=RP_ORDER.filter(id=>id!==c.value); $('#rpAll').checked=$$('.rpc').every(z=>z.checked); rpRefresh(); }; });
   $('#rpAll').checked=false; let sv={}; try{ sv=JSON.parse(localStorage.getItem(RP_KEY)||'{}'); }catch(e){}
   RPF.forEach(id=>{ $('#'+id).value=sv[id]||''; });
+  $('#rpOp').value=$('#rpOp').value.replace('นางสุคันทร บาอินทร์ | รองผู้อำนวยการโรงเรียน\n','นางสุคันทร บาอินทร์ | รองผู้อำนวยการโรงเรียนกระดุมทองวิทยา\n');
   if(!$('#rpOp').value) $('#rpOp').value=RP_OP_DEFAULT;
   if(!$('#rpNo').value.trim()) $('#rpNo').value='ศก 51008.08/';
   if(!$('#rpClose').value) $('#rpClose').value='จึงเรียนมาเพื่อโปรดทราบ';
